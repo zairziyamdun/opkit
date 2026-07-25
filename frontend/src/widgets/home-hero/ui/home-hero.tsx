@@ -1,8 +1,11 @@
 import { Link } from 'react-router-dom'
+import { useAuthSession } from '@/entities/user'
 import { ROUTES } from '@/shared/config/routes'
 import { Alert, Button } from '@/shared/ui'
 
 export function HomeHero() {
+  const { isAuthenticated, user } = useAuthSession()
+
   return (
     <section className="flex flex-1 flex-col gap-6">
       <div className="space-y-2">
@@ -10,24 +13,34 @@ export function HomeHero() {
           Opkit
         </h1>
         <p className="max-w-xl text-muted-foreground">
-          Mini CRM для управления задачами. Frontend Sprint 1: маршрутизация,
-          TanStack Query, Axios и базовый UI готовы к следующим фичам.
+          {isAuthenticated && user
+            ? `С возвращением, ${user.name}. Управляйте задачами в одном месте.`
+            : 'Mini CRM для управления задачами. Войдите или создайте аккаунт, чтобы начать.'}
         </p>
       </div>
 
-      <Alert>
-        Backend API: авторизация и задачи уже доступны. Следующий шаг —
-        страницы Login / Register и список задач.
-      </Alert>
-
-      <div className="flex flex-wrap gap-3">
-        <Link to={ROUTES.login}>
-          <Button>Перейти ко входу</Button>
-        </Link>
-        <Link to={ROUTES.tasks}>
-          <Button variant="outline">Задачи</Button>
-        </Link>
-      </div>
+      {isAuthenticated ? (
+        <div className="flex flex-wrap gap-3">
+          <Link to={ROUTES.tasks}>
+            <Button>Перейти к задачам</Button>
+          </Link>
+        </div>
+      ) : (
+        <>
+          <Alert>
+            Для доступа к задачам нужна авторизация. JWT хранится локально и
+            проверяется через /auth/me.
+          </Alert>
+          <div className="flex flex-wrap gap-3">
+            <Link to={ROUTES.login}>
+              <Button>Войти</Button>
+            </Link>
+            <Link to={ROUTES.register}>
+              <Button variant="outline">Регистрация</Button>
+            </Link>
+          </div>
+        </>
+      )}
     </section>
   )
 }

@@ -1,10 +1,5 @@
-import { PlaceholderState } from '@/shared/ui'
+import { LoginPanel } from '@/widgets/login-panel'
 
 export function LoginPage() {
-  return (
-    <PlaceholderState
-      title="Вход"
-      description="Страница логина будет добавлена в следующем спринте."
-    />
-  )
+  return <LoginPanel />
 }

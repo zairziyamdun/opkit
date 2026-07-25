@@ -1,10 +1,5 @@
-import { PlaceholderState } from '@/shared/ui'
+import { RegisterPanel } from '@/widgets/register-panel'
 
 export function RegisterPage() {
-  return (
-    <PlaceholderState
-      title="Регистрация"
-      description="Страница регистрации будет добавлена в следующем спринте."
-    />
-  )
+  return <RegisterPanel />
 }
