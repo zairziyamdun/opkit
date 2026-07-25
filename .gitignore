@@ -1,4 +1,5 @@
-# Docs: ignore all markdown except README
+# Docs: ignore all markdown except README and agent rules
 *.md
 !README.md
 !**/README.md
+!AGENTS.md
