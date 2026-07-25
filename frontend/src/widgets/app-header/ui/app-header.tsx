@@ -25,9 +25,17 @@ export function AppHeader() {
                   Задачи
                 </Button>
               </Link>
-              <span className="hidden text-sm text-muted-foreground sm:inline">
+              <Link to={ROUTES.profile}>
+                <Button variant="ghost" size="sm">
+                  Профиль
+                </Button>
+              </Link>
+              <Link
+                to={ROUTES.profile}
+                className="hidden text-sm text-muted-foreground hover:text-foreground sm:inline"
+              >
                 {user.name}
-              </span>
+              </Link>
               <LogoutButton />
             </>
           ) : (

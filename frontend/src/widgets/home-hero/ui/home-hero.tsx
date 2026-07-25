@@ -24,6 +24,9 @@ export function HomeHero() {
           <Link to={ROUTES.tasks}>
             <Button>Перейти к задачам</Button>
           </Link>
+          <Link to={ROUTES.profile}>
+            <Button variant="outline">Профиль</Button>
+          </Link>
         </div>
       ) : (
         <>

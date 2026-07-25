@@ -5,6 +5,7 @@ import { RootLayout } from '@/app/layouts/root-layout'
 import { HomePage } from '@/pages/home'
 import { LoginPage } from '@/pages/login'
 import { NotFoundPage } from '@/pages/not-found'
+import { ProfilePage } from '@/pages/profile'
 import { RegisterPage } from '@/pages/register'
 import { TasksPage } from '@/pages/tasks'
 import { ROUTES } from '@/shared/config/routes'
@@ -22,6 +23,7 @@ export function AppRouter() {
 
         <Route element={<ProtectedRoute />}>
           <Route path={ROUTES.tasks} element={<TasksPage />} />
+          <Route path={ROUTES.profile} element={<ProfilePage />} />
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />
