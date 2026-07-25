@@ -1,10 +1,5 @@
-import { PlaceholderState } from '@/shared/ui'
+import { TasksPanel } from '@/widgets/tasks-panel'
 
 export function TasksPage() {
-  return (
-    <PlaceholderState
-      title="Задачи"
-      description="Вы авторизованы. Список задач появится в следующем спринте."
-    />
-  )
+  return <TasksPanel />
 }

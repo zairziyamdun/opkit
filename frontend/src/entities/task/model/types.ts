@@ -1,0 +1,67 @@
+export const TASK_STATUS = {
+  TODO: 'TODO',
+  IN_PROGRESS: 'IN_PROGRESS',
+  DONE: 'DONE',
+} as const
+
+export type TaskStatus = (typeof TASK_STATUS)[keyof typeof TASK_STATUS]
+
+export const TASK_PRIORITY = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+} as const
+
+export type TaskPriority = (typeof TASK_PRIORITY)[keyof typeof TASK_PRIORITY]
+
+export const TASK_SORT_BY = {
+  CreatedAt: 'createdAt',
+  UpdatedAt: 'updatedAt',
+  Title: 'title',
+  Priority: 'priority',
+  Status: 'status',
+} as const
+
+export type TaskSortBy = (typeof TASK_SORT_BY)[keyof typeof TASK_SORT_BY]
+
+export const SORT_ORDER = {
+  Asc: 'asc',
+  Desc: 'desc',
+} as const
+
+export type SortOrder = (typeof SORT_ORDER)[keyof typeof SORT_ORDER]
+
+export interface Task {
+  readonly id: string
+  readonly title: string
+  readonly description: string | null
+  readonly status: TaskStatus
+  readonly priority: TaskPriority
+  readonly userId: string
+  readonly createdAt: string
+  readonly updatedAt: string
+}
+
+export interface PaginationMeta {
+  readonly page: number
+  readonly limit: number
+  readonly total: number
+  readonly totalPages: number
+  readonly hasNextPage: boolean
+  readonly hasPreviousPage: boolean
+}
+
+export interface PaginatedTasks {
+  readonly items: readonly Task[]
+  readonly meta: PaginationMeta
+}
+
+export interface TaskListQuery {
+  readonly page?: number
+  readonly limit?: number
+  readonly status?: TaskStatus
+  readonly priority?: TaskPriority
+  readonly search?: string
+  readonly sortBy?: TaskSortBy
+  readonly sortOrder?: SortOrder
+}
