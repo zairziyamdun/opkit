@@ -56,6 +56,15 @@ export interface PaginatedTasks {
   readonly meta: PaginationMeta
 }
 
+export interface CreateTaskPayload {
+  readonly title: string
+  readonly description?: string
+  readonly status?: TaskStatus
+  readonly priority?: TaskPriority
+}
+
+export type UpdateTaskPayload = Partial<CreateTaskPayload>
+
 export interface TaskListQuery {
   readonly page?: number
   readonly limit?: number

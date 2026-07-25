@@ -1,4 +1,5 @@
 import { useTasks } from '@/entities/task'
+import { CreateTaskButton } from '@/features/create-task'
 import { getErrorMessage } from '@/shared/api'
 import { Alert, Button, PageLoader, Spinner } from '@/shared/ui'
 import { useTaskListFilters } from '../model/use-task-list-filters'
@@ -12,11 +13,20 @@ export function TasksPanel() {
     filters.query,
   )
 
+  function handleTaskDeleted(): void {
+    if (data && data.items.length === 1 && data.meta.hasPreviousPage) {
+      filters.setPage(data.meta.page - 1)
+    }
+  }
+
   return (
     <section className="space-y-6">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">Задачи</h1>
-        {isFetching && !isPending ? <Spinner className="text-sm" /> : null}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-semibold tracking-tight">Задачи</h1>
+          {isFetching && !isPending ? <Spinner className="text-sm" /> : null}
+        </div>
+        <CreateTaskButton />
       </div>
 
       <TasksFilters filters={filters} />
@@ -39,11 +49,11 @@ export function TasksPanel() {
           <Alert>
             {filters.hasActiveFilters
               ? 'По заданным условиям ничего не найдено. Измените фильтры или поиск.'
-              : 'У вас пока нет задач.'}
+              : 'У вас пока нет задач. Создайте первую задачу.'}
           </Alert>
         ) : (
           <div className="space-y-6">
-            <TaskList tasks={data.items} />
+            <TaskList tasks={data.items} onTaskDeleted={handleTaskDeleted} />
             <TasksPagination
               meta={data.meta}
               isFetching={isFetching}

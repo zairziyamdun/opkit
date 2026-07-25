@@ -1,10 +1,8 @@
 import {
   SORT_ORDER,
-  TASK_PRIORITY,
-  TASK_PRIORITY_LABELS,
+  TASK_PRIORITY_OPTIONS,
   TASK_SORT_BY,
-  TASK_STATUS,
-  TASK_STATUS_LABELS,
+  TASK_STATUS_OPTIONS,
   type SortOrder,
   type TaskPriority,
   type TaskSortBy,
@@ -15,16 +13,12 @@ import type { TaskListFilters } from '../model/use-task-list-filters'
 
 const STATUS_OPTIONS: readonly SelectOption[] = [
   { value: '', label: 'Все статусы' },
-  { value: TASK_STATUS.TODO, label: TASK_STATUS_LABELS.TODO },
-  { value: TASK_STATUS.IN_PROGRESS, label: TASK_STATUS_LABELS.IN_PROGRESS },
-  { value: TASK_STATUS.DONE, label: TASK_STATUS_LABELS.DONE },
+  ...TASK_STATUS_OPTIONS,
 ]
 
 const PRIORITY_OPTIONS: readonly SelectOption[] = [
   { value: '', label: 'Все приоритеты' },
-  { value: TASK_PRIORITY.LOW, label: TASK_PRIORITY_LABELS.LOW },
-  { value: TASK_PRIORITY.MEDIUM, label: TASK_PRIORITY_LABELS.MEDIUM },
-  { value: TASK_PRIORITY.HIGH, label: TASK_PRIORITY_LABELS.HIGH },
+  ...TASK_PRIORITY_OPTIONS,
 ]
 
 const SORT_BY_OPTIONS: readonly SelectOption[] = [

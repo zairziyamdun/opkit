@@ -1,12 +1,17 @@
 import type { Task } from '@/entities/task'
 import { TaskCard } from './task-card'
 
-export function TaskList({ tasks }: { readonly tasks: readonly Task[] }) {
+interface TaskListProps {
+  readonly tasks: readonly Task[]
+  readonly onTaskDeleted?: () => void
+}
+
+export function TaskList({ tasks, onTaskDeleted }: TaskListProps) {
   return (
     <ul className="space-y-3">
       {tasks.map((task) => (
         <li key={task.id}>
-          <TaskCard task={task} />
+          <TaskCard task={task} onDeleted={onTaskDeleted} />
         </li>
       ))}
     </ul>
