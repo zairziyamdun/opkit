@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -26,6 +27,8 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UserEntity } from '../users/entities/user.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
+import { GetTasksQueryDto } from './dto/get-tasks-query.dto';
+import { PaginatedTasksResponseDto } from './dto/paginated-tasks-response.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { TaskEntity } from './entities/task.entity';
 import { TasksService } from './tasks.service';
@@ -50,10 +53,18 @@ export class TasksController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Список задач текущего пользователя' })
-  @ApiOkResponse({ type: TaskEntity, isArray: true })
-  findAll(@CurrentUser() user: UserEntity): Promise<TaskEntity[]> {
-    return this.tasksService.findAll(user.id);
+  @ApiOperation({
+    summary: 'Список задач текущего пользователя',
+    description:
+      'Поддерживает фильтрацию, поиск, сортировку и пагинацию. Всегда возвращает только задачи владельца JWT.',
+  })
+  @ApiOkResponse({ type: PaginatedTasksResponseDto })
+  @ApiBadRequestResponse({ description: 'Некорректные query-параметры' })
+  findAll(
+    @CurrentUser() user: UserEntity,
+    @Query() query: GetTasksQueryDto,
+  ): Promise<PaginatedTasksResponseDto> {
+    return this.tasksService.findAll(user.id, query);
   }
 
   @Get(':id')

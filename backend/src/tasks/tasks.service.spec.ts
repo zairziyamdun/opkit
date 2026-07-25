@@ -2,6 +2,11 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TaskPriority, TaskStatus } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import {
+  GetTasksQueryDto,
+  SortOrder,
+  TaskSortBy,
+} from './dto/get-tasks-query.dto';
 import { TasksService } from './tasks.service';
 
 describe('TasksService', () => {
@@ -11,6 +16,8 @@ describe('TasksService', () => {
   let taskFindFirst: jest.Mock;
   let taskUpdate: jest.Mock;
   let taskDeleteMany: jest.Mock;
+  let taskCount: jest.Mock;
+  let transaction: jest.Mock;
 
   const userId = '11111111-1111-1111-1111-111111111111';
   const otherUserId = '22222222-2222-2222-2222-222222222222';
@@ -19,12 +26,19 @@ describe('TasksService', () => {
   const ownedTask = {
     id: taskId,
     title: 'Own task',
-    description: null,
+    description: 'Quarterly report draft',
     status: TaskStatus.TODO,
     priority: TaskPriority.MEDIUM,
     userId,
     createdAt: new Date('2026-07-25T10:00:00.000Z'),
     updatedAt: new Date('2026-07-25T10:00:00.000Z'),
+  };
+
+  const defaultQuery: GetTasksQueryDto = {
+    page: 1,
+    limit: 10,
+    sortBy: TaskSortBy.CreatedAt,
+    sortOrder: SortOrder.Desc,
   };
 
   beforeEach(async () => {
@@ -33,6 +47,10 @@ describe('TasksService', () => {
     taskFindFirst = jest.fn();
     taskUpdate = jest.fn();
     taskDeleteMany = jest.fn();
+    taskCount = jest.fn();
+    transaction = jest.fn(async (operations: Promise<unknown>[]) =>
+      Promise.all(operations),
+    );
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -40,12 +58,14 @@ describe('TasksService', () => {
         {
           provide: PrismaService,
           useValue: {
+            $transaction: transaction,
             task: {
               create: taskCreate,
               findMany: taskFindMany,
               findFirst: taskFindFirst,
               update: taskUpdate,
               deleteMany: taskDeleteMany,
+              count: taskCount,
             },
           },
         },
@@ -77,14 +97,178 @@ describe('TasksService', () => {
 
   it('возвращает только задачи текущего пользователя', async () => {
     taskFindMany.mockResolvedValue([ownedTask]);
+    taskCount.mockResolvedValue(1);
 
-    const result = await tasksService.findAll(userId);
+    const result = await tasksService.findAll(userId, defaultQuery);
 
-    expect(taskFindMany).toHaveBeenCalledWith({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
+    expect(taskFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { userId },
+      }),
+    );
+    expect(result.items).toEqual([ownedTask]);
+  });
+
+  it('фильтрует по статусу', async () => {
+    taskFindMany.mockResolvedValue([ownedTask]);
+    taskCount.mockResolvedValue(1);
+
+    await tasksService.findAll(userId, {
+      ...defaultQuery,
+      status: TaskStatus.TODO,
     });
-    expect(result).toEqual([ownedTask]);
+
+    expect(taskFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          userId,
+          status: TaskStatus.TODO,
+        },
+      }),
+    );
+  });
+
+  it('фильтрует по приоритету', async () => {
+    taskFindMany.mockResolvedValue([ownedTask]);
+    taskCount.mockResolvedValue(1);
+
+    await tasksService.findAll(userId, {
+      ...defaultQuery,
+      priority: TaskPriority.HIGH,
+    });
+
+    expect(taskFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          userId,
+          priority: TaskPriority.HIGH,
+        },
+      }),
+    );
+  });
+
+  it('применяет несколько фильтров одновременно', async () => {
+    taskFindMany.mockResolvedValue([ownedTask]);
+    taskCount.mockResolvedValue(1);
+
+    await tasksService.findAll(userId, {
+      ...defaultQuery,
+      status: TaskStatus.TODO,
+      priority: TaskPriority.HIGH,
+      search: 'report',
+    });
+
+    expect(taskFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          userId,
+          status: TaskStatus.TODO,
+          priority: TaskPriority.HIGH,
+          OR: [
+            {
+              title: {
+                contains: 'report',
+                mode: 'insensitive',
+              },
+            },
+            {
+              description: {
+                contains: 'report',
+                mode: 'insensitive',
+              },
+            },
+          ],
+        },
+      }),
+    );
+  });
+
+  it('ищет по title и description через contains', async () => {
+    taskFindMany.mockResolvedValue([ownedTask]);
+    taskCount.mockResolvedValue(1);
+
+    await tasksService.findAll(userId, {
+      ...defaultQuery,
+      search: 'report',
+    });
+
+    expect(taskFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          userId,
+          OR: [
+            {
+              title: {
+                contains: 'report',
+                mode: 'insensitive',
+              },
+            },
+            {
+              description: {
+                contains: 'report',
+                mode: 'insensitive',
+              },
+            },
+          ],
+        },
+      }),
+    );
+  });
+
+  it('применяет пагинацию через skip/take', async () => {
+    taskFindMany.mockResolvedValue([ownedTask]);
+    taskCount.mockResolvedValue(25);
+
+    await tasksService.findAll(userId, {
+      ...defaultQuery,
+      page: 3,
+      limit: 5,
+    });
+
+    expect(taskFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        skip: 10,
+        take: 5,
+      }),
+    );
+  });
+
+  it('сортирует по whitelist-полю', async () => {
+    taskFindMany.mockResolvedValue([ownedTask]);
+    taskCount.mockResolvedValue(1);
+
+    await tasksService.findAll(userId, {
+      ...defaultQuery,
+      sortBy: TaskSortBy.Title,
+      sortOrder: SortOrder.Asc,
+    });
+
+    expect(taskFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderBy: { title: 'asc' },
+      }),
+    );
+  });
+
+  it('возвращает meta с totalPages и флагами страниц', async () => {
+    taskFindMany.mockResolvedValue([ownedTask]);
+    taskCount.mockResolvedValue(57);
+
+    const result = await tasksService.findAll(userId, {
+      ...defaultQuery,
+      page: 1,
+      limit: 10,
+    });
+
+    expect(result.meta).toEqual({
+      page: 1,
+      limit: 10,
+      total: 57,
+      totalPages: 6,
+      hasNextPage: true,
+      hasPreviousPage: false,
+    });
+    expect(transaction).toHaveBeenCalled();
   });
 
   it('возвращает свою задачу', async () => {
