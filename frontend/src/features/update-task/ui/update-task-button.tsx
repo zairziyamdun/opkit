@@ -10,7 +10,7 @@ import {
 } from '@/entities/task'
 import { useUpdateTaskMutation } from '@/features/update-task/model/use-update-task'
 import { getErrorMessage } from '@/shared/api'
-import { Button, Modal } from '@/shared/ui'
+import { Button, Modal, toast } from '@/shared/ui'
 
 export function UpdateTaskButton({ task }: { readonly task: Task }) {
   const [isOpen, setIsOpen] = useState(false)
@@ -36,6 +36,7 @@ export function UpdateTaskButton({ task }: { readonly task: Task }) {
       })
       updateTask.reset()
       setIsOpen(false)
+      toast.success('Изменения сохранены', 'Обновлено')
     } catch (error: unknown) {
       applyTaskFieldErrors(error, setFieldError)
     }

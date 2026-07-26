@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { Task } from '@/entities/task'
 import { useDeleteTaskMutation } from '@/features/delete-task/model/use-delete-task'
 import { getErrorMessage } from '@/shared/api'
-import { Alert, Button, Modal } from '@/shared/ui'
+import { Alert, Button, Modal, toast } from '@/shared/ui'
 
 interface DeleteTaskButtonProps {
   readonly task: Task
@@ -27,6 +27,7 @@ export function DeleteTaskButton({ task, onDeleted }: DeleteTaskButtonProps) {
       await deleteTask.mutateAsync(task.id)
       deleteTask.reset()
       setIsOpen(false)
+      toast.success(`«${task.title}» удалена`, 'Удалено')
       onDeleted?.()
     } catch {
       // Сообщение об ошибке показывается внутри модального окна

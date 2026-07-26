@@ -8,7 +8,7 @@ import {
 } from '@/entities/task'
 import { useCreateTaskMutation } from '@/features/create-task/model/use-create-task'
 import { getErrorMessage } from '@/shared/api'
-import { Button, Modal } from '@/shared/ui'
+import { Button, Modal, toast } from '@/shared/ui'
 
 export function CreateTaskButton() {
   const [isOpen, setIsOpen] = useState(false)
@@ -31,6 +31,7 @@ export function CreateTaskButton() {
       await createTask.mutateAsync(toCreateTaskPayload(values))
       createTask.reset()
       setIsOpen(false)
+      toast.success('Задача добавлена на доску', 'Создано')
     } catch (error: unknown) {
       applyTaskFieldErrors(error, setFieldError)
     }

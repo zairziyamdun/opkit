@@ -11,15 +11,16 @@ import {
   type DropAnimation,
 } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
-import { AnimatePresence, LayoutGroup, motion } from 'framer-motion'
+import { LayoutGroup } from 'framer-motion'
 import {
   TASK_STATUS,
+  TASK_STATUS_LABELS,
   type Task,
   type TaskStatus,
 } from '@/entities/task'
 import { useChangeTaskStatusMutation } from '@/features/change-task-status'
 import { getErrorMessage } from '@/shared/api'
-import { Alert } from '@/shared/ui'
+import { toast } from '@/shared/ui'
 import {
   KANBAN_COLUMN_ORDER,
   groupTasksByStatus,
@@ -81,7 +82,6 @@ export function KanbanBoard({ tasks, onTaskDeleted }: KanbanBoardProps) {
   const changeStatus = useChangeTaskStatusMutation()
   // Snapshot на время drag+fade, чтобы overlay не зависел от optimistic cache.
   const [activeTask, setActiveTask] = useState<Task | null>(null)
-  const [dropError, setDropError] = useState<string | null>(null)
   const fadeTimeoutRef = useRef<number | null>(null)
 
   const sensors = useSensors(
@@ -110,7 +110,6 @@ export function KanbanBoard({ tasks, onTaskDeleted }: KanbanBoardProps) {
   }
 
   function handleDragStart(event: DragStartEvent): void {
-    setDropError(null)
     const task = tasksById.get(String(event.active.id)) ?? null
     setActiveTask(task)
   }
@@ -138,11 +137,15 @@ export function KanbanBoard({ tasks, onTaskDeleted }: KanbanBoardProps) {
       { id: taskId, status: nextStatus },
       {
         onSuccess: () => {
-          setDropError(null)
+          toast.success(
+            `Перемещена в «${TASK_STATUS_LABELS[nextStatus]}»`,
+            'Статус обновлён',
+          )
         },
         onError: (error: unknown) => {
-          setDropError(
+          toast.error(
             getErrorMessage(error, 'Не удалось изменить статус задачи'),
+            'Ошибка',
           )
         },
       },
@@ -156,46 +159,30 @@ export function KanbanBoard({ tasks, onTaskDeleted }: KanbanBoardProps) {
   }
 
   return (
-    <div className="space-y-4">
-      <AnimatePresence>
-        {dropError ? (
-          <motion.div
-            key="drop-error"
-            initial={{ opacity: 0, y: -8, height: 0 }}
-            animate={{ opacity: 1, y: 0, height: 'auto' }}
-            exit={{ opacity: 0, y: -8, height: 0 }}
-            transition={{ duration: 0.18, ease: 'easeOut' }}
-          >
-            <Alert variant="destructive">{dropError}</Alert>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCorners}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
+    >
+      <LayoutGroup>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+          {KANBAN_COLUMN_ORDER.map((status) => (
+            <KanbanColumn
+              key={status}
+              status={status}
+              tasks={columns[status]}
+              activeDragTaskId={activeTask?.id ?? null}
+              onTaskDeleted={onTaskDeleted}
+            />
+          ))}
+        </div>
+      </LayoutGroup>
 
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCorners}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-        onDragCancel={handleDragCancel}
-      >
-        <LayoutGroup>
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-            {KANBAN_COLUMN_ORDER.map((status) => (
-              <KanbanColumn
-                key={status}
-                status={status}
-                tasks={columns[status]}
-                activeDragTaskId={activeTask?.id ?? null}
-                onTaskDeleted={onTaskDeleted}
-              />
-            ))}
-          </div>
-        </LayoutGroup>
-
-        <DragOverlay dropAnimation={dropAnimation}>
-          {activeTask ? <TaskCard task={activeTask} isDragOverlay /> : null}
-        </DragOverlay>
-      </DndContext>
-    </div>
+      <DragOverlay dropAnimation={dropAnimation}>
+        {activeTask ? <TaskCard task={activeTask} isDragOverlay /> : null}
+      </DragOverlay>
+    </DndContext>
   )
 }
