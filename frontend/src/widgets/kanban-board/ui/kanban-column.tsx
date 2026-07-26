@@ -6,12 +6,14 @@ import { TaskCard } from './task-card'
 interface KanbanColumnProps {
   readonly status: TaskStatus
   readonly tasks: readonly Task[]
+  readonly activeDragTaskId?: string | null
   readonly onTaskDeleted?: () => void
 }
 
 export function KanbanColumn({
   status,
   tasks,
+  activeDragTaskId = null,
   onTaskDeleted,
 }: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({
@@ -26,7 +28,7 @@ export function KanbanColumn({
     <section
       ref={setNodeRef}
       className={cn(
-        'flex min-h-72 min-w-0 flex-1 flex-col rounded-lg border border-border bg-muted/40',
+        'flex min-h-72 min-w-0 flex-1 flex-col rounded-lg border border-border bg-muted/40 transition-colors duration-150',
         isOver && 'border-primary/40 bg-primary/5',
       )}
     >
@@ -46,6 +48,7 @@ export function KanbanColumn({
             <TaskCard
               key={task.id}
               task={task}
+              isDragPlaceholder={activeDragTaskId === task.id}
               onDeleted={onTaskDeleted}
             />
           ))

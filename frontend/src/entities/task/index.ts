@@ -34,6 +34,18 @@ export {
 export { applyTaskFieldErrors } from './lib/task-field-errors'
 export type { TaskFieldErrorSetter } from './lib/task-field-errors'
 export {
+  applyOptimisticStatusToList,
+  findTaskStatusInLists,
+} from './lib/apply-optimistic-status'
+export {
+  applyTaskCreated,
+  applyTaskDeleted,
+  applyTaskStatusChanged,
+  applyTaskUpdated,
+  matchesTaskFilters,
+} from './lib/task-realtime-cache'
+export type { TaskListCacheResult } from './lib/task-realtime-cache'
+export {
   toCreateTaskPayload,
   toTaskFormValues,
   toUpdateTaskPayload,

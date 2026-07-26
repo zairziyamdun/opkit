@@ -14,6 +14,7 @@ import { cn } from '@/shared/lib/cn'
 interface TaskCardProps {
   readonly task: Task
   readonly isDragOverlay?: boolean
+  readonly isDragPlaceholder?: boolean
   readonly onDeleted?: () => void
 }
 
@@ -34,6 +35,7 @@ interface TaskCardContentProps {
   readonly task: Task
   readonly isDragging?: boolean
   readonly isDragOverlay?: boolean
+  readonly isDragPlaceholder?: boolean
   readonly isDraggable?: boolean
   readonly style?: CSSProperties
   readonly setNodeRef?: (node: HTMLElement | null) => void
@@ -46,6 +48,7 @@ function TaskCardContent({
   task,
   isDragging = false,
   isDragOverlay = false,
+  isDragPlaceholder = false,
   isDraggable = false,
   style,
   setNodeRef,
@@ -53,14 +56,17 @@ function TaskCardContent({
   attributes,
   listeners,
 }: TaskCardContentProps) {
+  const isHiddenPlaceholder = isDragging || isDragPlaceholder
+
   return (
     <article
       ref={setNodeRef}
       style={style}
       className={cn(
-        'rounded-lg border border-border bg-card p-3 shadow-sm',
-        isDragging && 'opacity-40',
-        isDragOverlay && 'shadow-lg ring-1 ring-border',
+        'rounded-lg border border-border bg-card p-3 shadow-sm transition-opacity duration-150 ease-out',
+        isHiddenPlaceholder && 'pointer-events-none opacity-0',
+        isDragOverlay &&
+          'opacity-100 shadow-lg ring-1 ring-border transition-none',
       )}
     >
       <div
@@ -106,9 +112,11 @@ function TaskCardContent({
 
 function DraggableTaskCard({
   task,
+  isDragPlaceholder = false,
   onDeleted,
 }: {
   readonly task: Task
+  readonly isDragPlaceholder?: boolean
   readonly onDeleted?: () => void
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
@@ -124,6 +132,7 @@ function DraggableTaskCard({
     <TaskCardContent
       task={task}
       isDragging={isDragging}
+      isDragPlaceholder={isDragPlaceholder}
       isDraggable
       setNodeRef={setNodeRef}
       style={{
@@ -139,11 +148,18 @@ function DraggableTaskCard({
 export function TaskCard({
   task,
   isDragOverlay = false,
+  isDragPlaceholder = false,
   onDeleted,
 }: TaskCardProps) {
   if (isDragOverlay) {
     return <TaskCardContent task={task} isDragOverlay />
   }
 
-  return <DraggableTaskCard task={task} onDeleted={onDeleted} />
+  return (
+    <DraggableTaskCard
+      task={task}
+      isDragPlaceholder={isDragPlaceholder}
+      onDeleted={onDeleted}
+    />
+  )
 }

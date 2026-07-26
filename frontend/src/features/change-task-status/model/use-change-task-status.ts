@@ -1,8 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
+  applyOptimisticStatusToList,
+  findTaskStatusInLists,
   taskQueryKeys,
   updateTaskRequest,
   type PaginatedTasks,
+  type Task,
+  type TaskListQuery,
   type TaskStatus,
 } from '@/entities/task'
 
@@ -15,23 +19,42 @@ interface ChangeTaskStatusContext {
   readonly previousQueries: ReadonlyArray<
     readonly [readonly unknown[], PaginatedTasks | undefined]
   >
+  readonly optimisticStatus: TaskStatus
+  readonly optimisticUpdatedAt: string
 }
 
-function applyStatusToLists(
+function getListQuery(queryKey: readonly unknown[]): TaskListQuery | null {
+  const params = queryKey[2]
+
+  if (typeof params !== 'object' || params === null) {
+    return null
+  }
+
+  return params as TaskListQuery
+}
+
+function syncTaskInLists(
   data: PaginatedTasks | undefined,
-  id: string,
-  status: TaskStatus,
+  query: TaskListQuery,
+  task: Task,
 ): PaginatedTasks | undefined {
   if (!data) {
     return data
   }
 
-  return {
-    ...data,
-    items: data.items.map((task) =>
-      task.id === id ? { ...task, status } : task,
-    ),
+  const exists = data.items.some((item) => item.id === task.id)
+
+  if (!exists) {
+    return data
   }
+
+  return applyOptimisticStatusToList(
+    data,
+    query,
+    task.id,
+    task.status,
+    task.updatedAt,
+  )
 }
 
 export function useChangeTaskStatusMutation() {
@@ -40,6 +63,7 @@ export function useChangeTaskStatusMutation() {
   return useMutation({
     mutationFn: ({ id, status }: ChangeTaskStatusVariables) =>
       updateTaskRequest(id, { status }),
+
     onMutate: async ({
       id,
       status,
@@ -50,15 +74,53 @@ export function useChangeTaskStatusMutation() {
         queryKey: taskQueryKeys.lists(),
       })
 
-      queryClient.setQueriesData<PaginatedTasks>(
-        { queryKey: taskQueryKeys.lists() },
-        (data) => applyStatusToLists(data, id, status),
-      )
+      const optimisticUpdatedAt = new Date().toISOString()
 
-      return { previousQueries }
+      for (const [queryKey, data] of previousQueries) {
+        if (!data) {
+          continue
+        }
+
+        const query = getListQuery(queryKey)
+
+        if (!query) {
+          continue
+        }
+
+        queryClient.setQueryData<PaginatedTasks>(
+          queryKey,
+          applyOptimisticStatusToList(
+            data,
+            query,
+            id,
+            status,
+            optimisticUpdatedAt,
+          ),
+        )
+      }
+
+      return {
+        previousQueries,
+        optimisticStatus: status,
+        optimisticUpdatedAt,
+      }
     },
-    onError: (_error, _variables, context) => {
+
+    onError: (_error, variables, context) => {
       if (!context) {
+        return
+      }
+
+      const currentEntries = queryClient.getQueriesData<PaginatedTasks>({
+        queryKey: taskQueryKeys.lists(),
+      })
+      const currentStatus = findTaskStatusInLists(currentEntries, variables.id)
+
+      // Более новый drag уже перезаписал статус — не откатываем его snapshot'ом.
+      if (
+        currentStatus !== null &&
+        currentStatus !== context.optimisticStatus
+      ) {
         return
       }
 
@@ -66,8 +128,29 @@ export function useChangeTaskStatusMutation() {
         queryClient.setQueryData(queryKey, data)
       }
     },
-    onSettled: async () => {
-      await queryClient.invalidateQueries({ queryKey: taskQueryKeys.lists() })
+
+    onSuccess: (task) => {
+      // Точечная синхронизация ответа сервера без invalidate / refetch.
+      const entries = queryClient.getQueriesData<PaginatedTasks>({
+        queryKey: taskQueryKeys.lists(),
+      })
+
+      for (const [queryKey, data] of entries) {
+        if (!data) {
+          continue
+        }
+
+        const query = getListQuery(queryKey)
+
+        if (!query) {
+          continue
+        }
+
+        queryClient.setQueryData<PaginatedTasks>(
+          queryKey,
+          syncTaskInLists(data, query, task),
+        )
+      }
     },
   })
 }

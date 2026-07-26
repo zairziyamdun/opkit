@@ -157,6 +157,23 @@ export function applyTaskUpdated(
     return removeTaskFromList(data, task.id)
   }
 
+  // Контент тот же — только синхронизация updatedAt (типичный echo после
+  // собственного PATCH). Без invalidate, чтобы не дёргать Kanban.
+  if (
+    existing.status === task.status &&
+    existing.title === task.title &&
+    existing.priority === task.priority &&
+    existing.description === task.description
+  ) {
+    return {
+      type: 'update',
+      data: {
+        ...data,
+        items: data.items.map((item) => (item.id === task.id ? task : item)),
+      },
+    }
+  }
+
   const sortBy = query.sortBy ?? TASK_SORT_BY.CreatedAt
 
   if (isSortFieldChanged(existing, task, sortBy)) {
@@ -184,12 +201,15 @@ export function applyTaskStatusChanged(
     return query.status === payload.status ? INVALIDATE : NONE
   }
 
+  // Кэш уже отражает этот статус (optimistic / предыдущее событие) —
+  // повторное WS-событие не должно дёргать UI.
   if (existing.status === payload.status) {
     return NONE
   }
 
-  // Кэш содержит более позднюю запись, чем момент события — не откатываем.
-  if (existing.updatedAt > payload.timestamp) {
+  // Устаревшее или равное по времени событие не перезаписывает более свежий cache
+  // (в т.ч. optimistic updatedAt после своего drag).
+  if (existing.updatedAt >= payload.timestamp) {
     return NONE
   }
 
