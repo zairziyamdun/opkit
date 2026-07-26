@@ -24,6 +24,7 @@ export { taskFormSchema } from './model/task-form-schema'
 export type { TaskFormValues } from './model/task-form-schema'
 export { taskQueryKeys } from './model/query-keys'
 export { useTasks } from './model/use-tasks'
+export { useTaskRealtime } from './model/use-task-realtime'
 export {
   createTaskRequest,
   deleteTaskRequest,
