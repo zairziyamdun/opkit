@@ -56,8 +56,10 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       await this.client.ping();
       this.logger.log('Redis connection verified');
     } catch (error) {
-      this.logger.error('Failed to connect to Redis', error);
-      throw error;
+      this.logger.error(
+        'Failed to connect to Redis; continuing without Redis-dependent features',
+        error,
+      );
     }
   }
 

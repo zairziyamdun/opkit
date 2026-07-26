@@ -107,4 +107,19 @@ describe('EventsGateway', () => {
     expect(disconnect).toHaveBeenCalledWith(true);
     expect(join).not.toHaveBeenCalled();
   });
+
+  it('emitToUser продолжает отправлять событие только в комнату пользователя', () => {
+    const emit = jest.fn();
+    const to = jest.fn().mockReturnValue({ emit });
+
+    Object.defineProperty(gateway, 'server', {
+      value: { to },
+    });
+
+    const payload = { id: 'task-1' };
+    gateway.emitToUser('user-1', 'task.updated', payload);
+
+    expect(to).toHaveBeenCalledWith('user:user-1');
+    expect(emit).toHaveBeenCalledWith('task.updated', payload);
+  });
 });
