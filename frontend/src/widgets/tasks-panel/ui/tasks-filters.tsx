@@ -36,7 +36,7 @@ const SORT_ORDER_OPTIONS: readonly SelectOption[] = [
 
 export function TasksFilters({ filters }: { readonly filters: TaskListFilters }) {
   return (
-    <div className="space-y-4 rounded-lg border border-border bg-card p-4 shadow-sm">
+    <div className="space-y-4 rounded-card border border-border bg-card p-4 shadow-card">
       <div className="space-y-2">
         <Label htmlFor="tasks-search">Поиск</Label>
         <Input

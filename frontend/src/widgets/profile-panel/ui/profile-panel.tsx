@@ -20,7 +20,9 @@ export function ProfilePanel() {
   if (error) {
     return (
       <section className="space-y-4">
-        <h1 className="text-2xl font-semibold tracking-tight">Профиль</h1>
+        <h1 className="text-h2 font-semibold tracking-tight text-foreground">
+          Профиль
+        </h1>
         <Alert variant="destructive">
           {getErrorMessage(error, 'Не удалось загрузить профиль')}
         </Alert>
@@ -34,7 +36,9 @@ export function ProfilePanel() {
   if (!user) {
     return (
       <section className="space-y-4">
-        <h1 className="text-2xl font-semibold tracking-tight">Профиль</h1>
+        <h1 className="text-h2 font-semibold tracking-tight text-foreground">
+          Профиль
+        </h1>
         <Alert>Данные пользователя недоступны</Alert>
       </section>
     )
@@ -43,31 +47,37 @@ export function ProfilePanel() {
   return (
     <section className="mx-auto w-full max-w-md space-y-6">
       <div className="space-y-2 text-center">
-        <h1 className="text-2xl font-semibold tracking-tight">Профиль</h1>
-        <p className="text-sm text-muted-foreground">
+        <h1 className="text-h2 font-semibold tracking-tight text-foreground">
+          Профиль
+        </h1>
+        <p className="text-small text-muted-foreground">
           Информация о вашем аккаунте
         </p>
       </div>
 
-      <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
+      <div className="rounded-card border border-border bg-card p-6 shadow-card">
         <dl className="space-y-4">
           <div className="space-y-1">
-            <dt className="text-sm text-muted-foreground">Имя</dt>
-            <dd className="text-sm font-medium text-foreground">{user.name}</dd>
+            <dt className="text-small text-muted-foreground">Имя</dt>
+            <dd className="text-small font-medium text-foreground">
+              {user.name}
+            </dd>
           </div>
           <div className="space-y-1">
-            <dt className="text-sm text-muted-foreground">Email</dt>
-            <dd className="text-sm font-medium text-foreground">{user.email}</dd>
+            <dt className="text-small text-muted-foreground">Email</dt>
+            <dd className="text-small font-medium text-foreground">
+              {user.email}
+            </dd>
           </div>
           <div className="space-y-1">
-            <dt className="text-sm text-muted-foreground">Дата регистрации</dt>
-            <dd className="text-sm font-medium text-foreground">
+            <dt className="text-small text-muted-foreground">Дата регистрации</dt>
+            <dd className="text-small font-medium text-foreground">
               {formatDate(user.createdAt)}
             </dd>
           </div>
           <div className="space-y-1">
-            <dt className="text-sm text-muted-foreground">Обновлён</dt>
-            <dd className="text-sm font-medium text-foreground">
+            <dt className="text-small text-muted-foreground">Обновлён</dt>
+            <dd className="text-small font-medium text-foreground">
               {formatDate(user.updatedAt)}
             </dd>
           </div>

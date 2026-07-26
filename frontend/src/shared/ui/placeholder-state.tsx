@@ -11,7 +11,9 @@ export function PlaceholderState({
 }: PlaceholderStateProps) {
   return (
     <section className="space-y-4">
-      <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+      <h1 className="text-h2 font-semibold tracking-tight text-foreground">
+        {title}
+      </h1>
       <Alert>{description}</Alert>
     </section>
   )

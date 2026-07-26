@@ -9,13 +9,16 @@ export function AppHeader() {
 
   return (
     <header className="border-b border-border bg-card">
-      <div className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between px-4">
-        <Link to={ROUTES.home} className="text-lg font-semibold tracking-tight">
+        <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4">
+        <Link
+          to={ROUTES.home}
+          className="text-h3 font-semibold tracking-tight text-foreground"
+        >
           Opkit
         </Link>
         <nav className="flex items-center gap-2">
           {hasToken && isLoading ? (
-            <span className="text-sm text-muted-foreground">Загрузка...</span>
+            <span className="text-small text-muted-foreground">Загрузка...</span>
           ) : null}
 
           {isAuthenticated && user ? (
@@ -32,7 +35,7 @@ export function AppHeader() {
               </Link>
               <Link
                 to={ROUTES.profile}
-                className="hidden text-sm text-muted-foreground hover:text-foreground sm:inline"
+                className="hidden text-small text-muted-foreground hover:text-foreground sm:inline"
               >
                 {user.name}
               </Link>

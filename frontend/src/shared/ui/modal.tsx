@@ -55,13 +55,16 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative z-10 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg border border-border bg-card p-6 shadow-lg"
+        className="relative z-10 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-modal border border-border bg-card p-6 shadow-modal"
       >
-        <h2 id={titleId} className="text-lg font-semibold tracking-tight">
+        <h2
+          id={titleId}
+          className="text-h3 font-semibold tracking-tight text-foreground"
+        >
           {title}
         </h2>
         {description ? (
-          <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+          <p className="mt-1 text-small text-muted-foreground">{description}</p>
         ) : null}
         <div className="mt-4">{children}</div>
       </div>

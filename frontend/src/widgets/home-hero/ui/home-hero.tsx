@@ -9,10 +9,10 @@ export function HomeHero() {
   return (
     <section className="flex flex-1 flex-col gap-6">
       <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+        <h1 className="text-h1 font-bold tracking-tight text-foreground">
           Opkit
         </h1>
-        <p className="max-w-xl text-muted-foreground">
+        <p className="max-w-xl text-body text-muted-foreground">
           {isAuthenticated && user
             ? `С возвращением, ${user.name}. Управляйте задачами в одном месте.`
             : 'Mini CRM для управления задачами. Войдите или создайте аккаунт, чтобы начать.'}

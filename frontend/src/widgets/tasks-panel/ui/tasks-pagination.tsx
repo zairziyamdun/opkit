@@ -14,7 +14,7 @@ export function TasksPagination({
 }: TasksPaginationProps) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <p className="text-sm text-muted-foreground">
+      <p className="text-small text-muted-foreground">
         Страница {meta.page} из {meta.totalPages} · всего {meta.total}
       </p>
       <div className="flex items-center gap-2">

@@ -26,9 +26,9 @@ const VARIANT_STYLES: Record<
 > = {
   success: {
     icon: CheckCircle2,
-    accent: 'border-l-emerald-600',
-    iconClass: 'text-emerald-700',
-    progress: 'bg-emerald-600',
+    accent: 'border-l-success',
+    iconClass: 'text-success',
+    progress: 'bg-success',
   },
   error: {
     icon: XCircle,
@@ -38,15 +38,15 @@ const VARIANT_STYLES: Record<
   },
   warning: {
     icon: AlertTriangle,
-    accent: 'border-l-amber-600',
-    iconClass: 'text-amber-700',
-    progress: 'bg-amber-600',
+    accent: 'border-l-warning',
+    iconClass: 'text-warning',
+    progress: 'bg-warning',
   },
   info: {
     icon: Info,
-    accent: 'border-l-stone-600',
-    iconClass: 'text-stone-600',
-    progress: 'bg-stone-600',
+    accent: 'border-l-primary',
+    iconClass: 'text-primary',
+    progress: 'bg-primary',
   },
 }
 
@@ -109,7 +109,7 @@ export function ToastItemView({ item }: ToastItemProps) {
       exit={{ opacity: 0, x: 16, scale: 0.98 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
       className={cn(
-        'pointer-events-auto relative w-[min(100vw-2rem,22rem)] overflow-hidden rounded-lg border border-border border-l-4 bg-card shadow-lg',
+        'pointer-events-auto relative w-[min(100vw-2rem,22rem)] overflow-hidden rounded-card border border-border border-l-4 bg-card shadow-card',
         styles.accent,
       )}
       onMouseEnter={() => setIsPaused(true)}
@@ -117,16 +117,18 @@ export function ToastItemView({ item }: ToastItemProps) {
       onFocus={() => setIsPaused(true)}
       onBlur={() => setIsPaused(false)}
     >
-      <div className="flex gap-3 p-3.5 pr-10">
+      <div className="flex gap-3 p-4 pr-10">
         <Icon
           className={cn('mt-0.5 size-5 shrink-0', styles.iconClass)}
           aria-hidden
         />
         <div className="min-w-0 space-y-0.5">
           {item.title ? (
-            <p className="text-sm font-semibold text-foreground">{item.title}</p>
+            <p className="text-small font-semibold text-foreground">
+              {item.title}
+            </p>
           ) : null}
-          <p className="text-sm leading-snug text-muted-foreground">
+          <p className="text-small leading-snug text-muted-foreground">
             {item.message}
           </p>
         </div>
@@ -135,7 +137,7 @@ export function ToastItemView({ item }: ToastItemProps) {
       <button
         type="button"
         aria-label="Закрыть уведомление"
-        className="absolute top-2.5 right-2.5 rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        className="absolute top-3 right-3 rounded-button p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         onClick={() => toast.dismiss(item.id)}
       >
         <X className="size-4" aria-hidden />

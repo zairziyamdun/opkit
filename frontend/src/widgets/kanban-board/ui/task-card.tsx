@@ -19,9 +19,11 @@ interface TaskCardProps {
 }
 
 const PRIORITY_STYLES: Record<TaskPriority, string> = {
-  [TASK_PRIORITY.LOW]: 'border-stone-300 bg-stone-100 text-stone-600',
-  [TASK_PRIORITY.MEDIUM]: 'border-amber-200 bg-amber-50 text-amber-700',
-  [TASK_PRIORITY.HIGH]: 'border-red-200 bg-red-50 text-red-700',
+  [TASK_PRIORITY.LOW]: 'border-priority-low/30 bg-muted text-priority-low',
+  [TASK_PRIORITY.MEDIUM]:
+    'border-priority-medium/30 bg-warning/10 text-priority-medium',
+  [TASK_PRIORITY.HIGH]:
+    'border-priority-high/30 bg-destructive/10 text-priority-high',
 }
 
 function formatDate(value: string): string {
@@ -63,11 +65,13 @@ function TaskCardContent({
       ref={setNodeRef}
       style={style}
       className={cn(
-        'rounded-lg border border-border bg-card p-3 shadow-sm transition-[opacity,box-shadow,border-color] duration-150 ease-out',
-        !isHiddenPlaceholder && !isDragOverlay && 'hover:shadow-md',
+        'rounded-card border border-border bg-card p-4 shadow-card transition-[opacity,box-shadow,border-color] duration-150 ease-out',
+        !isHiddenPlaceholder &&
+          !isDragOverlay &&
+          'hover:border-border-hover',
         isHiddenPlaceholder && 'pointer-events-none opacity-0',
         isDragOverlay &&
-          'rotate-2 scale-[1.02] opacity-100 shadow-xl ring-1 ring-border transition-none',
+          'rotate-2 scale-[1.02] opacity-100 shadow-modal ring-1 ring-border transition-none',
       )}
     >
       <div
@@ -79,10 +83,12 @@ function TaskCardContent({
         {...attributes}
       >
         <div className="flex items-start justify-between gap-2">
-          <h3 className="text-sm font-medium text-foreground">{task.title}</h3>
+          <h3 className="text-small font-medium text-foreground">
+            {task.title}
+          </h3>
           <span
             className={cn(
-              'inline-flex shrink-0 items-center rounded-full border px-2.5 py-0.5 text-xs font-medium',
+              'inline-flex shrink-0 items-center rounded-full border px-2.5 py-0.5 text-caption font-medium',
               PRIORITY_STYLES[task.priority],
             )}
           >
@@ -91,12 +97,12 @@ function TaskCardContent({
         </div>
 
         {task.description ? (
-          <p className="line-clamp-3 text-sm text-muted-foreground">
+          <p className="line-clamp-3 text-small text-muted-foreground">
             {task.description}
           </p>
         ) : null}
 
-        <p className="text-xs text-muted-foreground">
+        <p className="text-caption text-muted-foreground">
           Обновлена {formatDate(task.updatedAt)}
         </p>
       </div>
