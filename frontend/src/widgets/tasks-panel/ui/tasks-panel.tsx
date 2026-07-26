@@ -2,8 +2,8 @@ import { useTasks } from '@/entities/task'
 import { CreateTaskButton } from '@/features/create-task'
 import { getErrorMessage } from '@/shared/api'
 import { Alert, Button, PageLoader, Spinner } from '@/shared/ui'
+import { KanbanBoard } from '@/widgets/kanban-board'
 import { useTaskListFilters } from '../model/use-task-list-filters'
-import { TaskList } from './task-list'
 import { TasksFilters } from './tasks-filters'
 import { TasksPagination } from './tasks-pagination'
 
@@ -53,7 +53,10 @@ export function TasksPanel() {
           </Alert>
         ) : (
           <div className="space-y-6">
-            <TaskList tasks={data.items} onTaskDeleted={handleTaskDeleted} />
+            <KanbanBoard
+              tasks={data.items}
+              onTaskDeleted={handleTaskDeleted}
+            />
             <TasksPagination
               meta={data.meta}
               isFetching={isFetching}
