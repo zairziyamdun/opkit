@@ -31,8 +31,7 @@ export function HomeHero() {
       ) : (
         <>
           <Alert>
-            Для доступа к задачам нужна авторизация. JWT хранится локально и
-            проверяется через /auth/me.
+            Войдите в аккаунт, чтобы перейти к задачам.
           </Alert>
           <div className="flex flex-wrap gap-3">
             <Link to={ROUTES.login}>
