@@ -63,10 +63,11 @@ function TaskCardContent({
       ref={setNodeRef}
       style={style}
       className={cn(
-        'rounded-lg border border-border bg-card p-3 shadow-sm transition-opacity duration-150 ease-out',
+        'rounded-lg border border-border bg-card p-3 shadow-sm transition-[opacity,box-shadow,border-color] duration-150 ease-out',
+        !isHiddenPlaceholder && !isDragOverlay && 'hover:shadow-md',
         isHiddenPlaceholder && 'pointer-events-none opacity-0',
         isDragOverlay &&
-          'opacity-100 shadow-lg ring-1 ring-border transition-none',
+          'rotate-2 scale-[1.02] opacity-100 shadow-xl ring-1 ring-border transition-none',
       )}
     >
       <div

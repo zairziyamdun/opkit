@@ -11,6 +11,7 @@ import {
   type DropAnimation,
 } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
+import { AnimatePresence, LayoutGroup, motion } from 'framer-motion'
 import {
   TASK_STATUS,
   type Task,
@@ -156,9 +157,19 @@ export function KanbanBoard({ tasks, onTaskDeleted }: KanbanBoardProps) {
 
   return (
     <div className="space-y-4">
-      {dropError ? (
-        <Alert variant="destructive">{dropError}</Alert>
-      ) : null}
+      <AnimatePresence>
+        {dropError ? (
+          <motion.div
+            key="drop-error"
+            initial={{ opacity: 0, y: -8, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: 'auto' }}
+            exit={{ opacity: 0, y: -8, height: 0 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+          >
+            <Alert variant="destructive">{dropError}</Alert>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
 
       <DndContext
         sensors={sensors}
@@ -167,17 +178,19 @@ export function KanbanBoard({ tasks, onTaskDeleted }: KanbanBoardProps) {
         onDragEnd={handleDragEnd}
         onDragCancel={handleDragCancel}
       >
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-          {KANBAN_COLUMN_ORDER.map((status) => (
-            <KanbanColumn
-              key={status}
-              status={status}
-              tasks={columns[status]}
-              activeDragTaskId={activeTask?.id ?? null}
-              onTaskDeleted={onTaskDeleted}
-            />
-          ))}
-        </div>
+        <LayoutGroup>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+            {KANBAN_COLUMN_ORDER.map((status) => (
+              <KanbanColumn
+                key={status}
+                status={status}
+                tasks={columns[status]}
+                activeDragTaskId={activeTask?.id ?? null}
+                onTaskDeleted={onTaskDeleted}
+              />
+            ))}
+          </div>
+        </LayoutGroup>
 
         <DragOverlay dropAnimation={dropAnimation}>
           {activeTask ? <TaskCard task={activeTask} isDragOverlay /> : null}
