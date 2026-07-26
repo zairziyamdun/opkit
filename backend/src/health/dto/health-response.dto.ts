@@ -8,6 +8,9 @@ export class HealthResponseDto {
   @ApiProperty({ enum: ServiceStatus, example: ServiceStatus.Up })
   readonly database: ServiceStatus;
 
+  @ApiProperty({ enum: ServiceStatus, example: ServiceStatus.Up })
+  readonly redis: ServiceStatus;
+
   @ApiProperty({ description: 'Время работы процесса в секундах', example: 42 })
   readonly uptime: number;
 

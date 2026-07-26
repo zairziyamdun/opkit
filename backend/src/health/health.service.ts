@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { RedisService } from '../redis/redis.service';
 import { HealthResponseDto } from './dto/health-response.dto';
 import { HealthStatus, ServiceStatus } from './types/health-status.enum';
 
@@ -7,15 +8,24 @@ import { HealthStatus, ServiceStatus } from './types/health-status.enum';
 export class HealthService {
   private readonly logger = new Logger(HealthService.name);
 
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly redisService: RedisService,
+  ) {}
 
   async check(): Promise<HealthResponseDto> {
-    const database = await this.checkDatabase();
+    const [database, redis] = await Promise.all([
+      this.checkDatabase(),
+      this.checkRedis(),
+    ]);
+
+    const isHealthy =
+      database === ServiceStatus.Up && redis === ServiceStatus.Up;
 
     return {
-      status:
-        database === ServiceStatus.Up ? HealthStatus.Ok : HealthStatus.Error,
+      status: isHealthy ? HealthStatus.Ok : HealthStatus.Error,
       database,
+      redis,
       uptime: Math.floor(process.uptime()),
       timestamp: new Date().toISOString(),
     };
@@ -27,6 +37,16 @@ export class HealthService {
       return ServiceStatus.Up;
     } catch (error) {
       this.logger.error('Database health check failed', error);
+      return ServiceStatus.Down;
+    }
+  }
+
+  private async checkRedis(): Promise<ServiceStatus> {
+    try {
+      const isHealthy = await this.redisService.isHealthy();
+      return isHealthy ? ServiceStatus.Up : ServiceStatus.Down;
+    } catch (error) {
+      this.logger.error('Redis health check failed', error);
       return ServiceStatus.Down;
     }
   }

@@ -29,7 +29,11 @@ describe('HealthController (e2e)', () => {
       .get('/api/health')
       .expect(200)
       .expect(({ body }) => {
-        expect(body).toMatchObject({ status: 'ok', database: 'up' });
+        expect(body).toMatchObject({
+          status: 'ok',
+          database: 'up',
+          redis: 'up',
+        });
       });
   });
 
