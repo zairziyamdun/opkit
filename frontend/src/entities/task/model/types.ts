@@ -42,6 +42,13 @@ export interface Task {
   readonly updatedAt: string
 }
 
+/** Payload for Socket.IO `task.created` — matches backend TaskResponseDto */
+export type TaskCreatedPayload = Task
+
+/** Payload for Socket.IO `task.updated` — matches backend TaskResponseDto */
+export type TaskUpdatedPayload = Task
+
+
 export interface PaginationMeta {
   readonly page: number
   readonly limit: number

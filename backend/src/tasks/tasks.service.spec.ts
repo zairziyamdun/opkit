@@ -1,5 +1,7 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { TASK_EVENTS } from '../events/constants/task-events';
+import { EventsGateway } from '../events/events.gateway';
 import { TaskPriority, TaskStatus } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import {
@@ -7,6 +9,7 @@ import {
   SortOrder,
   TaskSortBy,
 } from './dto/get-tasks-query.dto';
+import { toTaskResponseDto } from './mapper/task.mapper';
 import { TasksService } from './tasks.service';
 
 describe('TasksService', () => {
@@ -18,6 +21,7 @@ describe('TasksService', () => {
   let taskDeleteMany: jest.Mock;
   let taskCount: jest.Mock;
   let transaction: jest.Mock;
+  let emitToUser: jest.Mock;
 
   const userId = '11111111-1111-1111-1111-111111111111';
   const otherUserId = '22222222-2222-2222-2222-222222222222';
@@ -51,6 +55,7 @@ describe('TasksService', () => {
     transaction = jest.fn(async (operations: Promise<unknown>[]) =>
       Promise.all(operations),
     );
+    emitToUser = jest.fn();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -68,6 +73,10 @@ describe('TasksService', () => {
               count: taskCount,
             },
           },
+        },
+        {
+          provide: EventsGateway,
+          useValue: { emitToUser },
         },
       ],
     }).compile();
@@ -93,6 +102,31 @@ describe('TasksService', () => {
       },
     });
     expect(result).toEqual(ownedTask);
+  });
+
+  it('отправляет task.created владельцу после успешного создания', async () => {
+    taskCreate.mockResolvedValue(ownedTask);
+
+    await tasksService.create(userId, {
+      title: 'Own task',
+      priority: TaskPriority.HIGH,
+    });
+
+    expect(emitToUser).toHaveBeenCalledTimes(1);
+    expect(emitToUser).toHaveBeenCalledWith(
+      userId,
+      TASK_EVENTS.Created,
+      toTaskResponseDto(ownedTask),
+    );
+  });
+
+  it('не отправляет task.created, если создание завершилось ошибкой', async () => {
+    taskCreate.mockRejectedValue(new Error('db write failed'));
+
+    await expect(
+      tasksService.create(userId, { title: 'Own task' }),
+    ).rejects.toThrow('db write failed');
+    expect(emitToUser).not.toHaveBeenCalled();
   });
 
   it('возвращает только задачи текущего пользователя', async () => {
@@ -317,6 +351,102 @@ describe('TasksService', () => {
     expect(result).toEqual(updatedTask);
   });
 
+  it('отправляет task.updated владельцу после успешного обновления', async () => {
+    const updatedTask = { ...ownedTask, title: 'Updated' };
+    taskFindFirst.mockResolvedValue(ownedTask);
+    taskUpdate.mockResolvedValue(updatedTask);
+
+    await tasksService.update(userId, taskId, { title: 'Updated' });
+
+    expect(emitToUser).toHaveBeenCalledTimes(1);
+    expect(emitToUser).toHaveBeenCalledWith(
+      userId,
+      TASK_EVENTS.Updated,
+      toTaskResponseDto(updatedTask),
+    );
+  });
+
+  it('отправляет task.status.changed после успешного изменения статуса', async () => {
+    const updatedTask = {
+      ...ownedTask,
+      status: TaskStatus.IN_PROGRESS,
+      updatedAt: new Date('2026-07-25T11:00:00.000Z'),
+    };
+    taskFindFirst.mockResolvedValue(ownedTask);
+    taskUpdate.mockResolvedValue(updatedTask);
+
+    await tasksService.update(userId, taskId, {
+      status: TaskStatus.IN_PROGRESS,
+    });
+
+    expect(emitToUser).toHaveBeenCalledTimes(2);
+    expect(emitToUser).toHaveBeenNthCalledWith(
+      1,
+      userId,
+      TASK_EVENTS.Updated,
+      toTaskResponseDto(updatedTask),
+    );
+    expect(emitToUser).toHaveBeenNthCalledWith(
+      2,
+      userId,
+      TASK_EVENTS.StatusChanged,
+      {
+        id: taskId,
+        status: TaskStatus.IN_PROGRESS,
+        timestamp: expect.any(String) as string,
+      },
+    );
+  });
+
+  it('не отправляет task.status.changed, если статус не изменился', async () => {
+    taskFindFirst.mockResolvedValue(ownedTask);
+    taskUpdate.mockResolvedValue(ownedTask);
+
+    await tasksService.update(userId, taskId, {
+      status: TaskStatus.TODO,
+    });
+
+    expect(emitToUser).toHaveBeenCalledTimes(1);
+    expect(emitToUser).toHaveBeenCalledWith(
+      userId,
+      TASK_EVENTS.Updated,
+      toTaskResponseDto(ownedTask),
+    );
+  });
+
+  it('не отправляет событие при ошибке обновления статуса', async () => {
+    taskFindFirst.mockResolvedValue(ownedTask);
+    taskUpdate.mockRejectedValue(new Error('db write failed'));
+
+    await expect(
+      tasksService.update(userId, taskId, {
+        status: TaskStatus.DONE,
+      }),
+    ).rejects.toThrow('db write failed');
+    expect(emitToUser).not.toHaveBeenCalled();
+  });
+
+  it('emitToUser вызывается только для владельца задачи', async () => {
+    const updatedTask = {
+      ...ownedTask,
+      status: TaskStatus.DONE,
+    };
+    taskFindFirst.mockResolvedValue(ownedTask);
+    taskUpdate.mockResolvedValue(updatedTask);
+
+    await tasksService.update(userId, taskId, {
+      status: TaskStatus.DONE,
+    });
+
+    const emitTargets = emitToUser.mock.calls.map(
+      (call: readonly [string, string, unknown]) => call[0],
+    );
+
+    expect(emitTargets.length).toBeGreaterThan(0);
+    expect(emitTargets.every((target) => target === userId)).toBe(true);
+    expect(emitTargets).not.toContain(otherUserId);
+  });
+
   it('возвращает 404 при попытке обновить чужую задачу', async () => {
     taskFindFirst.mockResolvedValue(null);
 
@@ -324,6 +454,7 @@ describe('TasksService', () => {
       tasksService.update(otherUserId, taskId, { title: 'Hack' }),
     ).rejects.toBeInstanceOf(NotFoundException);
     expect(taskUpdate).not.toHaveBeenCalled();
+    expect(emitToUser).not.toHaveBeenCalled();
   });
 
   it('возвращает 400 при пустом PATCH body', async () => {
@@ -332,6 +463,7 @@ describe('TasksService', () => {
     ).rejects.toBeInstanceOf(BadRequestException);
     expect(taskFindFirst).not.toHaveBeenCalled();
     expect(taskUpdate).not.toHaveBeenCalled();
+    expect(emitToUser).not.toHaveBeenCalled();
   });
 
   it('удаляет свою задачу', async () => {
@@ -343,11 +475,33 @@ describe('TasksService', () => {
     });
   });
 
+  it('отправляет task.deleted владельцу после успешного удаления', async () => {
+    taskDeleteMany.mockResolvedValue({ count: 1 });
+
+    await tasksService.remove(userId, taskId);
+
+    expect(emitToUser).toHaveBeenCalledTimes(1);
+    expect(emitToUser).toHaveBeenCalledWith(userId, TASK_EVENTS.Deleted, {
+      id: taskId,
+      timestamp: expect.any(String) as string,
+    });
+  });
+
+  it('не отправляет task.deleted при ошибке удаления', async () => {
+    taskDeleteMany.mockResolvedValue({ count: 0 });
+
+    await expect(tasksService.remove(userId, taskId)).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
+    expect(emitToUser).not.toHaveBeenCalled();
+  });
+
   it('возвращает 404 при попытке удалить чужую задачу', async () => {
     taskDeleteMany.mockResolvedValue({ count: 0 });
 
     await expect(
       tasksService.remove(otherUserId, taskId),
     ).rejects.toBeInstanceOf(NotFoundException);
+    expect(emitToUser).not.toHaveBeenCalled();
   });
 });

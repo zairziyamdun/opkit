@@ -3,6 +3,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { TASK_EVENTS } from '../events/constants/task-events';
+import { EventsGateway } from '../events/events.gateway';
 import { Prisma, Task } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -13,13 +15,21 @@ import {
 } from './dto/get-tasks-query.dto';
 import { PaginatedTasksResponseDto } from './dto/paginated-tasks-response.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { toTaskResponseDto } from './mapper/task.mapper';
+import {
+  TaskDeletedPayload,
+  TaskStatusChangedPayload,
+} from './types/task-event-payload.interface';
 
 @Injectable()
 export class TasksService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly eventsGateway: EventsGateway,
+  ) {}
 
   async create(userId: string, dto: CreateTaskDto): Promise<Task> {
-    return this.prismaService.task.create({
+    const task = await this.prismaService.task.create({
       data: {
         title: dto.title,
         description: dto.description,
@@ -28,6 +38,14 @@ export class TasksService {
         userId,
       },
     });
+
+    this.eventsGateway.emitToUser(
+      userId,
+      TASK_EVENTS.Created,
+      toTaskResponseDto(task),
+    );
+
+    return task;
   }
 
   async findAll(
@@ -74,12 +92,34 @@ export class TasksService {
       throw new BadRequestException('At least one field must be provided');
     }
 
-    await this.findOwnedOrFail(userId, id);
+    const existing = await this.findOwnedOrFail(userId, id);
 
-    return this.prismaService.task.update({
+    const updated = await this.prismaService.task.update({
       where: { id },
       data,
     });
+
+    this.eventsGateway.emitToUser(
+      userId,
+      TASK_EVENTS.Updated,
+      toTaskResponseDto(updated),
+    );
+
+    if (data.status !== undefined && data.status !== existing.status) {
+      const statusPayload: TaskStatusChangedPayload = {
+        id: updated.id,
+        status: updated.status,
+        timestamp: new Date().toISOString(),
+      };
+
+      this.eventsGateway.emitToUser(
+        userId,
+        TASK_EVENTS.StatusChanged,
+        statusPayload,
+      );
+    }
+
+    return updated;
   }
 
   async remove(userId: string, id: string): Promise<void> {
@@ -90,6 +130,13 @@ export class TasksService {
     if (result.count === 0) {
       throw new NotFoundException('Task not found');
     }
+
+    const deletedPayload: TaskDeletedPayload = {
+      id,
+      timestamp: new Date().toISOString(),
+    };
+
+    this.eventsGateway.emitToUser(userId, TASK_EVENTS.Deleted, deletedPayload);
   }
 
   private buildWhere(

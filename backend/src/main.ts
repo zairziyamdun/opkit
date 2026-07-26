@@ -3,17 +3,21 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { SocketIoAdapter } from './events/adapters/socket-io.adapter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+  const frontendUrl = configService.getOrThrow<string>('FRONTEND_URL');
 
   app.setGlobalPrefix('api');
 
   app.enableCors({
-    origin: configService.getOrThrow<string>('FRONTEND_URL'),
+    origin: frontendUrl,
     credentials: true,
   });
+
+  app.useWebSocketAdapter(new SocketIoAdapter(app, frontendUrl));
 
   app.useGlobalPipes(
     new ValidationPipe({

@@ -4,10 +4,12 @@ export type {
   PaginationMeta,
   SortOrder,
   Task,
+  TaskCreatedPayload,
   TaskListQuery,
   TaskPriority,
   TaskSortBy,
   TaskStatus,
+  TaskUpdatedPayload,
   UpdateTaskPayload,
 } from './model/types'
 export {
