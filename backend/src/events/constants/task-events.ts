@@ -4,5 +4,3 @@ export const TASK_EVENTS = {
   Deleted: 'task.deleted',
   StatusChanged: 'task.status.changed',
 } as const;
-
-export type TaskEventName = (typeof TASK_EVENTS)[keyof typeof TASK_EVENTS];

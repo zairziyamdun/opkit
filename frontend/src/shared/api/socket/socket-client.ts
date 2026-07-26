@@ -80,7 +80,3 @@ export function disconnectSocket(): void {
 
   setSocketAuth(null)
 }
-
-export function isSocketConnected(): boolean {
-  return socket.connected
-}

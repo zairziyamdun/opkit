@@ -4,6 +4,3 @@ export const TASK_SOCKET_EVENTS = {
   DELETED: 'task.deleted',
   STATUS_CHANGED: 'task.status.changed',
 } as const
-
-export type TaskSocketEvent =
-  (typeof TASK_SOCKET_EVENTS)[keyof typeof TASK_SOCKET_EVENTS]
