@@ -1,5 +1,5 @@
-import { CSS } from '@dnd-kit/utilities'
 import type { DropAnimation } from '@dnd-kit/core'
+import { CSS } from '@dnd-kit/utilities'
 import {
   TASK_STATUS,
   type Task,

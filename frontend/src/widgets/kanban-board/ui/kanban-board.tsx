@@ -1,4 +1,5 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import {
   DndContext,
   DragOverlay,
@@ -55,6 +56,20 @@ export function KanbanBoard({ tasks, onTaskDeleted }: KanbanBoardProps) {
     () => new Map(tasks.map((task) => [task.id, task])),
     [tasks],
   )
+
+  useEffect(() => {
+    if (activeTask === null) {
+      return
+    }
+
+    const root = document.documentElement
+    const previousOverflow = root.style.overflow
+    root.style.overflow = 'hidden'
+
+    return () => {
+      root.style.overflow = previousOverflow
+    }
+  }, [activeTask])
 
   function clearActiveTaskAfterFade(): void {
     if (fadeTimeoutRef.current !== null) {
@@ -126,10 +141,25 @@ export function KanbanBoard({ tasks, onTaskDeleted }: KanbanBoardProps) {
     clearActiveTaskAfterFade()
   }
 
+  const overlay =
+    typeof document === 'undefined'
+      ? null
+      : createPortal(
+          <div className="pointer-events-none fixed inset-0 z-[80] overflow-hidden [contain:paint]">
+            <DragOverlay dropAnimation={dropAnimation}>
+              {activeTask ? (
+                <TaskCard task={activeTask} isDragOverlay />
+              ) : null}
+            </DragOverlay>
+          </div>,
+          document.body,
+        )
+
   return (
     <DndContext
       sensors={sensors}
       collisionDetection={closestCorners}
+      autoScroll={false}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onDragCancel={clearActiveTaskAfterFade}
@@ -150,9 +180,7 @@ export function KanbanBoard({ tasks, onTaskDeleted }: KanbanBoardProps) {
 
       <KanbanDangerZone isVisible={activeTask !== null} />
 
-      <DragOverlay dropAnimation={dropAnimation}>
-        {activeTask ? <TaskCard task={activeTask} isDragOverlay /> : null}
-      </DragOverlay>
+      {overlay}
     </DndContext>
   )
 }
