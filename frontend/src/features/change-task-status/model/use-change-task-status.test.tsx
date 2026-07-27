@@ -34,6 +34,7 @@ function createTask(overrides: Partial<Task> = {}): Task {
     description: 'Quarterly report',
     status: TASK_STATUS.TODO,
     priority: TASK_PRIORITY.MEDIUM,
+    position: 0,
     userId: 'user-1',
     createdAt: '2026-07-25T10:00:00.000Z',
     updatedAt: '2026-07-25T10:00:00.000Z',

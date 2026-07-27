@@ -12,14 +12,15 @@ import {
 } from '@dnd-kit/core'
 import { LayoutGroup } from 'framer-motion'
 import { TASK_STATUS_LABELS, type Task } from '@/entities/task'
-import { useChangeTaskStatusMutation } from '@/features/change-task-status'
 import { useDeleteTaskMutation } from '@/features/delete-task'
+import { useReorderTaskMutation } from '@/features/reorder-task'
 import { getErrorMessage } from '@/shared/api'
 import { toast } from '@/shared/ui'
 import {
   DROP_FADE_MS,
   dropAnimation,
-  resolveTargetStatus,
+  findTaskContainer,
+  resolveDropPosition,
 } from '../lib/kanban-dnd'
 import {
   KANBAN_COLUMN_ORDER,
@@ -38,7 +39,7 @@ interface KanbanBoardProps {
 }
 
 export function KanbanBoard({ tasks, onTaskDeleted }: KanbanBoardProps) {
-  const changeStatus = useChangeTaskStatusMutation()
+  const reorderTask = useReorderTaskMutation()
   const deleteTask = useDeleteTaskMutation()
   const [activeTask, setActiveTask] = useState<Task | null>(null)
   const fadeTimeoutRef = useRef<number | null>(null)
@@ -113,25 +114,49 @@ export function KanbanBoard({ tasks, onTaskDeleted }: KanbanBoardProps) {
       return
     }
 
-    const nextStatus = resolveTargetStatus(over.id, tasksById)
+    const activeContainer = findTaskContainer(active.id, columns)
+    const overContainer = findTaskContainer(over.id, columns)
 
-    if (!nextStatus || nextStatus === task.status) {
+    if (!activeContainer || !overContainer) {
       clearActiveTaskAfterFade()
       return
     }
 
-    changeStatus.mutate(
-      { id: taskId, status: nextStatus },
+    const nextPosition = resolveDropPosition(
+      over.id,
+      overContainer,
+      columns,
+      active.id,
+    )
+
+    if (
+      activeContainer === overContainer &&
+      task.position === nextPosition
+    ) {
+      clearActiveTaskAfterFade()
+      return
+    }
+
+    const statusChanged = overContainer !== task.status
+
+    reorderTask.mutate(
+      {
+        id: taskId,
+        status: overContainer,
+        position: nextPosition,
+      },
       {
         onSuccess: () => {
-          toast.success(
-            `Перемещена в «${TASK_STATUS_LABELS[nextStatus]}»`,
-            'Статус обновлён',
-          )
+          if (statusChanged) {
+            toast.success(
+              `Перемещена в «${TASK_STATUS_LABELS[overContainer]}»`,
+              'Статус обновлён',
+            )
+          }
         },
         onError: (error: unknown) => {
           toast.error(
-            getErrorMessage(error, 'Не удалось изменить статус задачи'),
+            getErrorMessage(error, 'Не удалось переместить задачу'),
             'Ошибка',
           )
         },

@@ -2,6 +2,7 @@ import { apiClient } from '@/shared/api'
 import type {
   CreateTaskPayload,
   PaginatedTasks,
+  ReorderTaskPayload,
   Task,
   TaskListQuery,
   UpdateTaskPayload,
@@ -28,6 +29,14 @@ export async function updateTaskRequest(
   payload: UpdateTaskPayload,
 ): Promise<Task> {
   const { data } = await apiClient.patch<Task>(`/tasks/${id}`, payload)
+  return data
+}
+
+export async function reorderTaskRequest(
+  id: string,
+  payload: ReorderTaskPayload,
+): Promise<Task> {
+  const { data } = await apiClient.patch<Task>(`/tasks/${id}/reorder`, payload)
   return data
 }
 

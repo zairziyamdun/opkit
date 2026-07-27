@@ -8,6 +8,7 @@ export function toTaskResponseDto(task: Task): TaskResponseDto {
     description: task.description,
     status: task.status,
     priority: task.priority,
+    position: task.position,
     userId: task.userId,
     createdAt: task.createdAt.toISOString(),
     updatedAt: task.updatedAt.toISOString(),

@@ -18,8 +18,8 @@ export function useTaskListFilters() {
   const debouncedSearch = useDebouncedValue(searchInput.trim(), 400)
   const [status, setStatus] = useState<TaskStatus | ''>('')
   const [priority, setPriority] = useState<TaskPriority | ''>('')
-  const [sortBy, setSortBy] = useState<TaskSortBy>(TASK_SORT_BY.CreatedAt)
-  const [sortOrder, setSortOrder] = useState<SortOrder>(SORT_ORDER.Desc)
+  const [sortBy, setSortBy] = useState<TaskSortBy>(TASK_SORT_BY.Position)
+  const [sortOrder, setSortOrder] = useState<SortOrder>(SORT_ORDER.Asc)
   const [page, setPage] = useState(FIRST_PAGE)
 
   function onSearchChange(value: string): void {
@@ -66,8 +66,8 @@ export function useTaskListFilters() {
     setSearchInput('')
     setStatus('')
     setPriority('')
-    setSortBy(TASK_SORT_BY.CreatedAt)
-    setSortOrder(SORT_ORDER.Desc)
+    setSortBy(TASK_SORT_BY.Position)
+    setSortOrder(SORT_ORDER.Asc)
     setPage(FIRST_PAGE)
   }
 

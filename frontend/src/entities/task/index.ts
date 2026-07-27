@@ -2,6 +2,7 @@ export type {
   CreateTaskPayload,
   PaginatedTasks,
   PaginationMeta,
+  ReorderTaskPayload,
   SortOrder,
   Task,
   TaskCreatedPayload,
@@ -29,6 +30,7 @@ export {
   createTaskRequest,
   deleteTaskRequest,
   getTasksRequest,
+  reorderTaskRequest,
   updateTaskRequest,
 } from './api/task-api'
 export { applyTaskFieldErrors } from './lib/task-field-errors'
@@ -37,6 +39,7 @@ export {
   applyOptimisticStatusToList,
   findTaskStatusInLists,
 } from './lib/apply-optimistic-status'
+export { applyOptimisticReorderToList } from './lib/apply-optimistic-reorder'
 export {
   applyTaskCreated,
   applyTaskDeleted,

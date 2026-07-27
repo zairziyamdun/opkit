@@ -1,4 +1,8 @@
 import { useDroppable } from '@dnd-kit/core'
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
 import { AnimatePresence, motion, type Transition } from 'framer-motion'
 import {
   TASK_STATUS,
@@ -43,6 +47,8 @@ export function KanbanColumn({
     },
   })
 
+  const itemIds = tasks.map((task) => task.id)
+
   return (
     <section
       ref={setNodeRef}
@@ -67,40 +73,42 @@ export function KanbanColumn({
       </header>
 
       <div className="flex flex-1 flex-col gap-2 px-2.5 pb-2.5">
-        <AnimatePresence initial={false} mode="popLayout">
-          {tasks.length === 0 ? (
-            <motion.p
-              key="empty"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className={cn(
-                'px-2 py-6 text-center text-caption text-muted-foreground',
-                isOver && 'text-primary',
-              )}
-            >
-              {isOver ? 'Отпустите карточку' : 'Пока нет задач'}
-            </motion.p>
-          ) : (
-            tasks.map((task) => (
-              <motion.div
-                key={task.id}
-                layout
-                layoutId={task.id}
-                initial={{ opacity: 0, y: 8, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.96 }}
-                transition={cardTransition}
+        <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
+          <AnimatePresence initial={false} mode="popLayout">
+            {tasks.length === 0 ? (
+              <motion.p
+                key="empty"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className={cn(
+                  'px-2 py-6 text-center text-caption text-muted-foreground',
+                  isOver && 'text-primary',
+                )}
               >
-                <TaskCard
-                  task={task}
-                  isDragPlaceholder={activeDragTaskId === task.id}
-                  onDeleted={onTaskDeleted}
-                />
-              </motion.div>
-            ))
-          )}
-        </AnimatePresence>
+                {isOver ? 'Отпустите карточку' : 'Пока нет задач'}
+              </motion.p>
+            ) : (
+              tasks.map((task) => (
+                <motion.div
+                  key={task.id}
+                  layout
+                  layoutId={task.id}
+                  initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.96 }}
+                  transition={cardTransition}
+                >
+                  <TaskCard
+                    task={task}
+                    isDragPlaceholder={activeDragTaskId === task.id}
+                    onDeleted={onTaskDeleted}
+                  />
+                </motion.div>
+              ))
+            )}
+          </AnimatePresence>
+        </SortableContext>
       </div>
     </section>
   )

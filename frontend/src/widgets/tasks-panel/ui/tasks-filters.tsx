@@ -22,6 +22,7 @@ const PRIORITY_OPTIONS: readonly SelectOption[] = [
 ]
 
 const SORT_BY_OPTIONS: readonly SelectOption[] = [
+  { value: TASK_SORT_BY.Position, label: 'По порядку на доске' },
   { value: TASK_SORT_BY.CreatedAt, label: 'По дате создания' },
   { value: TASK_SORT_BY.UpdatedAt, label: 'По дате обновления' },
   { value: TASK_SORT_BY.Title, label: 'По названию' },

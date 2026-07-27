@@ -23,5 +23,9 @@ export function groupTasksByStatus(tasks: readonly Task[]): KanbanColumns {
     columns[task.status].push(task)
   }
 
+  for (const status of KANBAN_COLUMN_ORDER) {
+    columns[status].sort((left, right) => left.position - right.position)
+  }
+
   return columns
 }

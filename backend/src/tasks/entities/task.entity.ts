@@ -20,6 +20,9 @@ export class TaskEntity {
   @ApiProperty({ enum: TaskPriority, example: TaskPriority.MEDIUM })
   readonly priority: TaskPriority;
 
+  @ApiProperty({ example: 0 })
+  readonly position: number;
+
   @ApiProperty({ format: 'uuid' })
   readonly userId: string;
 

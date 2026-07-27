@@ -18,8 +18,11 @@ describe('TasksService', () => {
   let taskFindMany: jest.Mock;
   let taskFindFirst: jest.Mock;
   let taskUpdate: jest.Mock;
+  let taskUpdateMany: jest.Mock;
+  let taskDelete: jest.Mock;
   let taskDeleteMany: jest.Mock;
   let taskCount: jest.Mock;
+  let taskAggregate: jest.Mock;
   let transaction: jest.Mock;
   let emitToUser: jest.Mock;
 
@@ -33,6 +36,7 @@ describe('TasksService', () => {
     description: 'Quarterly report draft',
     status: TaskStatus.TODO,
     priority: TaskPriority.MEDIUM,
+    position: 0,
     userId,
     createdAt: new Date('2026-07-25T10:00:00.000Z'),
     updatedAt: new Date('2026-07-25T10:00:00.000Z'),
@@ -50,11 +54,33 @@ describe('TasksService', () => {
     taskFindMany = jest.fn();
     taskFindFirst = jest.fn();
     taskUpdate = jest.fn();
+    taskUpdateMany = jest.fn();
+    taskDelete = jest.fn();
     taskDeleteMany = jest.fn();
     taskCount = jest.fn();
-    transaction = jest.fn(async (operations: Promise<unknown>[]) =>
-      Promise.all(operations),
-    );
+    taskAggregate = jest.fn().mockResolvedValue({ _max: { position: null } });
+    const prismaTask = {
+      create: taskCreate,
+      findMany: taskFindMany,
+      findFirst: taskFindFirst,
+      update: taskUpdate,
+      updateMany: taskUpdateMany,
+      delete: taskDelete,
+      deleteMany: taskDeleteMany,
+      count: taskCount,
+      aggregate: taskAggregate,
+    };
+    transaction = jest.fn(async (arg: unknown) => {
+      if (typeof arg === 'function') {
+        return (
+          arg as (tx: { task: typeof prismaTask }) => Promise<unknown>
+        )({
+          task: prismaTask,
+        });
+      }
+
+      return Promise.all(arg as Promise<unknown>[]);
+    });
     emitToUser = jest.fn();
 
     const module: TestingModule = await Test.createTestingModule({
@@ -64,14 +90,7 @@ describe('TasksService', () => {
           provide: PrismaService,
           useValue: {
             $transaction: transaction,
-            task: {
-              create: taskCreate,
-              findMany: taskFindMany,
-              findFirst: taskFindFirst,
-              update: taskUpdate,
-              deleteMany: taskDeleteMany,
-              count: taskCount,
-            },
+            task: prismaTask,
           },
         },
         {
@@ -92,12 +111,14 @@ describe('TasksService', () => {
       priority: TaskPriority.HIGH,
     });
 
+    expect(taskAggregate).toHaveBeenCalled();
     expect(taskCreate).toHaveBeenCalledWith({
       data: {
         title: 'Own task',
         description: undefined,
-        status: undefined,
+        status: TaskStatus.TODO,
         priority: TaskPriority.HIGH,
+        position: 0,
         userId,
       },
     });
@@ -370,9 +391,12 @@ describe('TasksService', () => {
     const updatedTask = {
       ...ownedTask,
       status: TaskStatus.IN_PROGRESS,
+      position: 0,
       updatedAt: new Date('2026-07-25T11:00:00.000Z'),
     };
     taskFindFirst.mockResolvedValue(ownedTask);
+    taskFindMany.mockResolvedValue([]);
+    taskUpdateMany.mockResolvedValue({ count: 0 });
     taskUpdate.mockResolvedValue(updatedTask);
 
     await tasksService.update(userId, taskId, {
@@ -416,6 +440,7 @@ describe('TasksService', () => {
 
   it('не отправляет событие при ошибке обновления статуса', async () => {
     taskFindFirst.mockResolvedValue(ownedTask);
+    taskFindMany.mockResolvedValue([]);
     taskUpdate.mockRejectedValue(new Error('db write failed'));
 
     await expect(
@@ -430,8 +455,11 @@ describe('TasksService', () => {
     const updatedTask = {
       ...ownedTask,
       status: TaskStatus.DONE,
+      position: 0,
     };
     taskFindFirst.mockResolvedValue(ownedTask);
+    taskFindMany.mockResolvedValue([]);
+    taskUpdateMany.mockResolvedValue({ count: 0 });
     taskUpdate.mockResolvedValue(updatedTask);
 
     await tasksService.update(userId, taskId, {
@@ -467,16 +495,20 @@ describe('TasksService', () => {
   });
 
   it('удаляет свою задачу', async () => {
-    taskDeleteMany.mockResolvedValue({ count: 1 });
+    taskFindFirst.mockResolvedValue(ownedTask);
+    taskDelete.mockResolvedValue(ownedTask);
+    taskUpdateMany.mockResolvedValue({ count: 0 });
 
     await expect(tasksService.remove(userId, taskId)).resolves.toBeUndefined();
-    expect(taskDeleteMany).toHaveBeenCalledWith({
-      where: { id: taskId, userId },
+    expect(taskDelete).toHaveBeenCalledWith({
+      where: { id: taskId },
     });
   });
 
   it('отправляет task.deleted владельцу после успешного удаления', async () => {
-    taskDeleteMany.mockResolvedValue({ count: 1 });
+    taskFindFirst.mockResolvedValue(ownedTask);
+    taskDelete.mockResolvedValue(ownedTask);
+    taskUpdateMany.mockResolvedValue({ count: 0 });
 
     await tasksService.remove(userId, taskId);
 
@@ -488,7 +520,7 @@ describe('TasksService', () => {
   });
 
   it('не отправляет task.deleted при ошибке удаления', async () => {
-    taskDeleteMany.mockResolvedValue({ count: 0 });
+    taskFindFirst.mockResolvedValue(null);
 
     await expect(tasksService.remove(userId, taskId)).rejects.toBeInstanceOf(
       NotFoundException,
@@ -497,7 +529,7 @@ describe('TasksService', () => {
   });
 
   it('возвращает 404 при попытке удалить чужую задачу', async () => {
-    taskDeleteMany.mockResolvedValue({ count: 0 });
+    taskFindFirst.mockResolvedValue(null);
 
     await expect(
       tasksService.remove(otherUserId, taskId),

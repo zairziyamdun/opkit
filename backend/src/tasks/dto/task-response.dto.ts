@@ -20,6 +20,9 @@ export class TaskResponseDto {
   @ApiProperty({ enum: TaskPriority, example: TaskPriority.MEDIUM })
   readonly priority: TaskPriority;
 
+  @ApiProperty({ example: 0, description: 'Порядок в колонке статуса' })
+  readonly position: number;
+
   @ApiProperty({ format: 'uuid' })
   readonly userId: string;
 

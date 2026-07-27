@@ -20,6 +20,7 @@ export const TASK_SORT_BY = {
   Title: 'title',
   Priority: 'priority',
   Status: 'status',
+  Position: 'position',
 } as const
 
 export type TaskSortBy = (typeof TASK_SORT_BY)[keyof typeof TASK_SORT_BY]
@@ -37,6 +38,7 @@ export interface Task {
   readonly description: string | null
   readonly status: TaskStatus
   readonly priority: TaskPriority
+  readonly position: number
   readonly userId: string
   readonly createdAt: string
   readonly updatedAt: string
@@ -71,6 +73,11 @@ export interface CreateTaskPayload {
 }
 
 export type UpdateTaskPayload = Partial<CreateTaskPayload>
+
+export interface ReorderTaskPayload {
+  readonly status?: TaskStatus
+  readonly position: number
+}
 
 export interface TaskListQuery {
   readonly page?: number

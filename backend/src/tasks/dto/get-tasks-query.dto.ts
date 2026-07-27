@@ -17,6 +17,7 @@ export enum TaskSortBy {
   Title = 'title',
   Priority = 'priority',
   Status = 'status',
+  Position = 'position',
 }
 
 export enum SortOrder {

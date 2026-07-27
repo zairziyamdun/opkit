@@ -29,6 +29,7 @@ import { UserEntity } from '../users/entities/user.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { GetTasksQueryDto } from './dto/get-tasks-query.dto';
 import { PaginatedTasksResponseDto } from './dto/paginated-tasks-response.dto';
+import { ReorderTaskDto } from './dto/reorder-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { TaskEntity } from './entities/task.entity';
 import { TasksService } from './tasks.service';
@@ -77,6 +78,19 @@ export class TasksController {
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<TaskEntity> {
     return this.tasksService.findOne(user.id, id);
+  }
+
+  @Patch(':id/reorder')
+  @ApiOperation({ summary: 'Изменить порядок задачи на доске' })
+  @ApiOkResponse({ type: TaskEntity })
+  @ApiBadRequestResponse({ description: 'Некорректные данные или UUID' })
+  @ApiNotFoundResponse({ description: 'Задача не найдена' })
+  reorder(
+    @CurrentUser() user: UserEntity,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ReorderTaskDto,
+  ): Promise<TaskEntity> {
+    return this.tasksService.reorder(user.id, id, dto);
   }
 
   @Patch(':id')

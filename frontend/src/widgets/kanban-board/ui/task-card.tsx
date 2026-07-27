@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react'
-import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
+import { useSortable } from '@dnd-kit/sortable'
 import { GripVertical } from 'lucide-react'
 import { TASK_PRIORITY_LABELS, type Task } from '@/entities/task'
 import { cn } from '@/shared/lib/cn'
@@ -18,6 +18,9 @@ interface TaskCardProps {
   readonly onDeleted?: () => void
 }
 
+type SortableAttributes = ReturnType<typeof useSortable>['attributes']
+type SortableListeners = ReturnType<typeof useSortable>['listeners']
+
 interface TaskCardContentProps {
   readonly task: Task
   readonly isDragging?: boolean
@@ -27,8 +30,8 @@ interface TaskCardContentProps {
   readonly style?: CSSProperties
   readonly setNodeRef?: (node: HTMLElement | null) => void
   readonly onDeleted?: () => void
-  readonly attributes?: ReturnType<typeof useDraggable>['attributes']
-  readonly listeners?: ReturnType<typeof useDraggable>['listeners']
+  readonly attributes?: SortableAttributes
+  readonly listeners?: SortableListeners
 }
 
 function TaskCardContent({
@@ -110,7 +113,7 @@ function TaskCardContent({
   )
 }
 
-function DraggableTaskCard({
+function SortableTaskCard({
   task,
   isDragPlaceholder = false,
   onDeleted,
@@ -119,14 +122,21 @@ function DraggableTaskCard({
   readonly isDragPlaceholder?: boolean
   readonly onDeleted?: () => void
 }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useDraggable({
-      id: task.id,
-      data: {
-        type: 'task',
-        task,
-      },
-    })
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: task.id,
+    data: {
+      type: 'task',
+      task,
+      status: task.status,
+    },
+  })
 
   return (
     <TaskCardContent
@@ -136,7 +146,8 @@ function DraggableTaskCard({
       isDraggable
       setNodeRef={setNodeRef}
       style={{
-        transform: CSS.Translate.toString(transform),
+        transform: CSS.Transform.toString(transform),
+        transition,
       }}
       attributes={attributes}
       listeners={listeners}
@@ -156,7 +167,7 @@ export function TaskCard({
   }
 
   return (
-    <DraggableTaskCard
+    <SortableTaskCard
       task={task}
       isDragPlaceholder={isDragPlaceholder}
       onDeleted={onDeleted}

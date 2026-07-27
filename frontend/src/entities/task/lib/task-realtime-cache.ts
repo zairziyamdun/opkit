@@ -95,6 +95,8 @@ function isSortFieldChanged(
       return previous.priority !== next.priority
     case TASK_SORT_BY.Status:
       return previous.status !== next.status
+    case TASK_SORT_BY.Position:
+      return previous.position !== next.position
   }
 }
 
@@ -163,7 +165,8 @@ export function applyTaskUpdated(
     existing.status === task.status &&
     existing.title === task.title &&
     existing.priority === task.priority &&
-    existing.description === task.description
+    existing.description === task.description &&
+    existing.position === task.position
   ) {
     return {
       type: 'update',
