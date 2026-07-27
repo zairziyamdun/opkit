@@ -1,33 +1,26 @@
 import { ArrowDown, ArrowUp, ChevronsUp } from 'lucide-react'
-import {
-  TASK_PRIORITY,
-  type TaskPriority,
-} from '@/entities/task'
+import { TASK_PRIORITY, type TaskPriority } from '@/entities/task'
 
-export const PRIORITY_ACCENT: Record<TaskPriority, string> = {
-  [TASK_PRIORITY.LOW]: 'border-l-priority-low',
-  [TASK_PRIORITY.MEDIUM]: 'border-l-priority-medium',
-  [TASK_PRIORITY.HIGH]: 'border-l-priority-high',
+export const PRIORITY_BADGE: Record<TaskPriority, string> = {
+  [TASK_PRIORITY.LOW]: 'bg-muted text-priority-low',
+  [TASK_PRIORITY.MEDIUM]: 'bg-warning/10 text-priority-medium',
+  [TASK_PRIORITY.HIGH]: 'bg-destructive/10 text-priority-high',
 }
 
 export const PRIORITY_META: Record<
   TaskPriority,
   {
     readonly icon: typeof ArrowDown
-    readonly className: string
   }
 > = {
   [TASK_PRIORITY.LOW]: {
     icon: ArrowDown,
-    className: 'text-priority-low',
   },
   [TASK_PRIORITY.MEDIUM]: {
     icon: ArrowUp,
-    className: 'text-priority-medium',
   },
   [TASK_PRIORITY.HIGH]: {
     icon: ChevronsUp,
-    className: 'text-priority-high',
   },
 }
 
@@ -45,11 +38,11 @@ export function formatRelativeDate(value: string): string {
   )
 
   if (diffDays <= 0) {
-    return 'сегодня'
+    return 'Сегодня'
   }
 
   if (diffDays === 1) {
-    return 'вчера'
+    return 'Вчера'
   }
 
   if (diffDays < 7) {

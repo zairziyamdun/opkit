@@ -1,6 +1,5 @@
 import { useDroppable } from '@dnd-kit/core'
 import { AnimatePresence, motion, type Transition } from 'framer-motion'
-import { CheckCircle2, Circle, CircleDot } from 'lucide-react'
 import {
   TASK_STATUS,
   TASK_STATUS_LABELS,
@@ -24,33 +23,10 @@ const cardTransition: Transition = {
   mass: 0.7,
 }
 
-const COLUMN_META: Record<
-  TaskStatus,
-  {
-    readonly icon: typeof Circle
-    readonly badge: string
-    readonly iconClass: string
-    readonly over: string
-  }
-> = {
-  [TASK_STATUS.TODO]: {
-    icon: Circle,
-    badge: 'bg-slate-200 text-status-todo-fg',
-    iconClass: 'text-status-todo-fg',
-    over: 'bg-primary/5 ring-2 ring-primary/25',
-  },
-  [TASK_STATUS.IN_PROGRESS]: {
-    icon: CircleDot,
-    badge: 'bg-status-progress-bg text-status-progress-fg',
-    iconClass: 'text-status-progress-fg',
-    over: 'bg-status-progress-bg/80 ring-2 ring-primary/30',
-  },
-  [TASK_STATUS.DONE]: {
-    icon: CheckCircle2,
-    badge: 'bg-status-done-bg text-status-done-fg',
-    iconClass: 'text-status-done-fg',
-    over: 'bg-status-done-bg/80 ring-2 ring-success/30',
-  },
+const COLUMN_OVER: Record<TaskStatus, string> = {
+  [TASK_STATUS.TODO]: 'ring-2 ring-primary/20',
+  [TASK_STATUS.IN_PROGRESS]: 'ring-2 ring-primary/25',
+  [TASK_STATUS.DONE]: 'ring-2 ring-success/25',
 }
 
 export function KanbanColumn({
@@ -67,61 +43,51 @@ export function KanbanColumn({
     },
   })
 
-  const meta = COLUMN_META[status]
-  const Icon = meta.icon
-
   return (
     <section
       ref={setNodeRef}
       className={cn(
-        'flex max-h-[min(72vh,760px)] min-h-[28rem] w-full min-w-[280px] flex-1 flex-col rounded-xl bg-column transition-all duration-200 ease-out lg:max-w-sm',
-        isOver && meta.over,
+        'flex min-h-64 min-w-0 flex-col rounded-xl border border-border/70 bg-card transition-shadow duration-150',
+        isOver && COLUMN_OVER[status],
       )}
     >
-      <header className="sticky top-0 z-10 flex items-center gap-2 px-3 pt-3 pb-2">
-        <span
-          className={cn(
-            'inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-caption font-semibold tracking-tight',
-            meta.badge,
-          )}
-        >
-          <Icon className={cn('size-3.5', meta.iconClass)} aria-hidden />
+      <header className="flex items-center gap-2 px-3 pt-3 pb-2">
+        <h2 className="text-small font-semibold tracking-tight text-foreground">
           {TASK_STATUS_LABELS[status]}
-        </span>
+        </h2>
         <motion.span
           key={tasks.length}
           initial={{ opacity: 0.4, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.18 }}
-          className="inline-flex min-w-6 items-center justify-center rounded-full bg-slate-300/60 px-1.5 py-0.5 text-caption font-semibold text-foreground-body tabular-nums"
+          className="inline-flex min-w-5 items-center justify-center rounded-full bg-muted px-1.5 py-0.5 text-caption font-semibold text-muted-foreground tabular-nums"
         >
           {tasks.length}
         </motion.span>
       </header>
 
-      <div className="flex flex-1 flex-col gap-2 overflow-y-auto px-2 pb-3">
+      <div className="flex flex-1 flex-col gap-2 px-2.5 pb-2.5">
         <AnimatePresence initial={false} mode="popLayout">
           {tasks.length === 0 ? (
-            <motion.div
+            <motion.p
               key="empty"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
               className={cn(
-                'mt-1 flex flex-1 items-center justify-center rounded-lg border border-dashed border-border-hover px-3 py-10 text-center text-caption text-muted-foreground transition-colors',
-                isOver && 'border-primary/40 bg-card/60 text-primary',
+                'px-2 py-6 text-center text-caption text-muted-foreground',
+                isOver && 'text-primary',
               )}
             >
-              {isOver ? 'Отпустите карточку' : 'Перетащите задачу сюда'}
-            </motion.div>
+              {isOver ? 'Отпустите карточку' : 'Пока нет задач'}
+            </motion.p>
           ) : (
             tasks.map((task) => (
               <motion.div
                 key={task.id}
                 layout
                 layoutId={task.id}
-                initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                initial={{ opacity: 0, y: 8, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.96 }}
                 transition={cardTransition}

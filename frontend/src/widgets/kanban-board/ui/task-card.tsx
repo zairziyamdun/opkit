@@ -3,14 +3,13 @@ import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { GripVertical } from 'lucide-react'
 import { TASK_PRIORITY_LABELS, type Task } from '@/entities/task'
-import { DeleteTaskButton } from '@/features/delete-task'
-import { UpdateTaskButton } from '@/features/update-task'
 import { cn } from '@/shared/lib/cn'
 import {
-  PRIORITY_ACCENT,
+  PRIORITY_BADGE,
   PRIORITY_META,
   formatRelativeDate,
 } from '../lib/task-card-styles'
+import { TaskCardMenu } from './task-card-menu'
 
 interface TaskCardProps {
   readonly task: Task
@@ -45,79 +44,68 @@ function TaskCardContent({
   listeners,
 }: TaskCardContentProps) {
   const isHiddenPlaceholder = isDragging || isDragPlaceholder
-  const priority = PRIORITY_META[task.priority]
-  const PriorityIcon = priority.icon
+  const PriorityIcon = PRIORITY_META[task.priority].icon
 
   return (
     <article
       ref={setNodeRef}
       style={style}
       className={cn(
-        'group rounded-[8px] border border-transparent border-l-[3px] bg-card shadow-card transition-[box-shadow,transform,opacity] duration-150 ease-out',
-        PRIORITY_ACCENT[task.priority],
+        'rounded-lg border border-border bg-card shadow-sm transition-[box-shadow,transform,opacity] duration-150 ease-out',
         !isHiddenPlaceholder && !isDragOverlay && 'hover:shadow-card-hover',
         isHiddenPlaceholder && 'pointer-events-none opacity-0',
         isDragOverlay &&
-          'rotate-[1.5deg] scale-[1.03] border-border opacity-100 shadow-drag ring-1 ring-border/80 transition-none',
+          'rotate-[1.5deg] scale-[1.02] opacity-100 shadow-drag ring-1 ring-border transition-none',
       )}
     >
       <div
         className={cn(
-          'space-y-2 p-3',
-          isDraggable && 'cursor-grab active:cursor-grabbing',
+          'flex items-start gap-1 p-3',
+          isDraggable && 'cursor-grab touch-none active:cursor-grabbing',
         )}
-        {...listeners}
-        {...attributes}
+        aria-label={isDraggable ? 'Перетащить задачу' : undefined}
+        {...(isDraggable ? listeners : undefined)}
+        {...(isDraggable ? attributes : undefined)}
       >
-        <div className="flex items-start gap-1.5">
-          <GripVertical
-            className={cn(
-              'mt-0.5 size-4 shrink-0 text-placeholder transition-opacity',
-              isDraggable || isDragOverlay
-                ? 'opacity-50 group-hover:opacity-100'
-                : 'opacity-0',
-            )}
-            aria-hidden
-          />
-          <div className="min-w-0 flex-1 space-y-2">
-            <h3 className="text-small leading-snug font-semibold text-foreground">
+        <span className="mt-0.5 shrink-0 rounded p-0.5 text-placeholder">
+          <GripVertical className="size-4" aria-hidden />
+        </span>
+
+        <div className="min-w-0 flex-1 space-y-2">
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="text-[15px] leading-snug font-semibold text-foreground">
               {task.title}
             </h3>
-
-            {task.description ? (
-              <p className="line-clamp-2 text-caption leading-relaxed text-muted-foreground">
-                {task.description}
-              </p>
+            {!isDragOverlay ? (
+              <TaskCardMenu task={task} onDeleted={onDeleted} />
             ) : null}
+          </div>
 
-            <div className="flex items-center justify-between gap-2">
-              <span
-                className={cn(
-                  'inline-flex items-center gap-1 text-caption font-medium',
-                  priority.className,
-                )}
-                title={`Приоритет: ${TASK_PRIORITY_LABELS[task.priority]}`}
-              >
-                <PriorityIcon className="size-3.5" aria-hidden />
-                {TASK_PRIORITY_LABELS[task.priority]}
-              </span>
-              <time
-                dateTime={task.updatedAt}
-                className="text-caption text-muted-foreground tabular-nums"
-              >
-                {formatRelativeDate(task.updatedAt)}
-              </time>
-            </div>
+          {task.description ? (
+            <p className="line-clamp-2 text-caption leading-relaxed text-muted-foreground">
+              {task.description}
+            </p>
+          ) : null}
+
+          <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+            <span
+              className={cn(
+                'inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-caption font-medium',
+                PRIORITY_BADGE[task.priority],
+              )}
+            >
+              <PriorityIcon className="size-3" aria-hidden />
+              {TASK_PRIORITY_LABELS[task.priority]}
+            </span>
+            <time
+              dateTime={task.updatedAt}
+              className="inline-flex rounded-md bg-muted px-1.5 py-0.5 text-caption font-medium text-muted-foreground tabular-nums"
+            >
+              {formatRelativeDate(task.updatedAt)}
+            </time>
           </div>
         </div>
       </div>
-
-      {!isDragOverlay ? (
-        <div className="flex items-center gap-1.5 border-t border-border/60 px-2 py-1.5">
-          <UpdateTaskButton task={task} />
-          <DeleteTaskButton task={task} onDeleted={onDeleted} />
-        </div>
-      ) : null}
     </article>
   )
 }

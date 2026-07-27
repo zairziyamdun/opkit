@@ -7,11 +7,28 @@ import { Alert, Button, Modal, toast } from '@/shared/ui'
 interface DeleteTaskButtonProps {
   readonly task: Task
   readonly onDeleted?: () => void
+  readonly open?: boolean
+  readonly onOpenChange?: (open: boolean) => void
+  readonly showTrigger?: boolean
 }
 
-export function DeleteTaskButton({ task, onDeleted }: DeleteTaskButtonProps) {
-  const [isOpen, setIsOpen] = useState(false)
+export function DeleteTaskButton({
+  task,
+  onDeleted,
+  open,
+  onOpenChange,
+  showTrigger = true,
+}: DeleteTaskButtonProps) {
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
+  const isOpen = open ?? uncontrolledOpen
   const deleteTask = useDeleteTaskMutation()
+
+  function setIsOpen(next: boolean): void {
+    onOpenChange?.(next)
+    if (open === undefined) {
+      setUncontrolledOpen(next)
+    }
+  }
 
   function handleClose(): void {
     if (deleteTask.isPending) {
@@ -36,14 +53,16 @@ export function DeleteTaskButton({ task, onDeleted }: DeleteTaskButtonProps) {
 
   return (
     <>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-        onClick={() => setIsOpen(true)}
-      >
-        Удалить
-      </Button>
+      {showTrigger ? (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+          onClick={() => setIsOpen(true)}
+        >
+          Удалить
+        </Button>
+      ) : null}
 
       <Modal
         isOpen={isOpen}

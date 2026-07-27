@@ -1,4 +1,3 @@
-import { LayoutGrid } from 'lucide-react'
 import { useTasks } from '@/entities/task'
 import { CreateTaskButton } from '@/features/create-task'
 import { getErrorMessage } from '@/shared/api'
@@ -22,13 +21,9 @@ export function TasksPanel() {
 
   return (
     <section className="flex flex-1 flex-col gap-4">
-      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-border pb-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 text-caption font-medium text-muted-foreground">
-            <LayoutGrid className="size-3.5" aria-hidden />
-            Доска
-          </div>
-          <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0 space-y-1">
+          <div className="flex items-center gap-2.5">
             <h1 className="text-h2 font-semibold tracking-tight text-foreground">
               Задачи
             </h1>
@@ -37,10 +32,11 @@ export function TasksPanel() {
                 {data.meta.total}
               </span>
             ) : null}
-            {isFetching && !isPending ? (
-              <Spinner className="text-sm" />
-            ) : null}
+            {isFetching && !isPending ? <Spinner className="text-sm" /> : null}
           </div>
+          <p className="text-small text-muted-foreground">
+            Управляйте задачами и отслеживайте прогресс
+          </p>
         </div>
         <CreateTaskButton />
       </div>
@@ -50,7 +46,7 @@ export function TasksPanel() {
       {isPending ? <PageLoader /> : null}
 
       {isError ? (
-        <div className="space-y-4 rounded-xl border border-border bg-card p-6 shadow-card">
+        <div className="space-y-4 rounded-xl border border-border bg-card p-6">
           <Alert variant="destructive">
             {getErrorMessage(error, 'Не удалось загрузить задачи')}
           </Alert>
@@ -62,7 +58,7 @@ export function TasksPanel() {
 
       {!isPending && !isError && data ? (
         data.items.length === 0 ? (
-          <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-border-hover bg-muted/40 px-6 py-16 text-center">
+          <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-border-hover bg-card px-6 py-16 text-center">
             <p className="max-w-md text-small text-muted-foreground">
               {filters.hasActiveFilters
                 ? 'По заданным условиям ничего не найдено. Измените фильтры или поиск.'
@@ -85,12 +81,10 @@ export function TasksPanel() {
           </div>
         ) : (
           <div className="flex flex-1 flex-col gap-4">
-            <div className="rounded-xl bg-board/70 p-3 sm:p-4">
-              <KanbanBoard
-                tasks={data.items}
-                onTaskDeleted={handleTaskDeleted}
-              />
-            </div>
+            <KanbanBoard
+              tasks={data.items}
+              onTaskDeleted={handleTaskDeleted}
+            />
             <TasksPagination
               meta={data.meta}
               isFetching={isFetching}

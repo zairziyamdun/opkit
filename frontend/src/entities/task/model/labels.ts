@@ -8,7 +8,7 @@ import {
 export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
   [TASK_STATUS.TODO]: 'К выполнению',
   [TASK_STATUS.IN_PROGRESS]: 'В работе',
-  [TASK_STATUS.DONE]: 'Выполнена',
+  [TASK_STATUS.DONE]: 'Выполнено',
 }
 
 export const TASK_PRIORITY_LABELS: Record<TaskPriority, string> = {

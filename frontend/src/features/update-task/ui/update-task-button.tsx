@@ -12,9 +12,29 @@ import { useUpdateTaskMutation } from '@/features/update-task/model/use-update-t
 import { getErrorMessage } from '@/shared/api'
 import { Button, Modal, toast } from '@/shared/ui'
 
-export function UpdateTaskButton({ task }: { readonly task: Task }) {
-  const [isOpen, setIsOpen] = useState(false)
+interface UpdateTaskButtonProps {
+  readonly task: Task
+  readonly open?: boolean
+  readonly onOpenChange?: (open: boolean) => void
+  readonly showTrigger?: boolean
+}
+
+export function UpdateTaskButton({
+  task,
+  open,
+  onOpenChange,
+  showTrigger = true,
+}: UpdateTaskButtonProps) {
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
+  const isOpen = open ?? uncontrolledOpen
   const updateTask = useUpdateTaskMutation()
+
+  function setIsOpen(next: boolean): void {
+    onOpenChange?.(next)
+    if (open === undefined) {
+      setUncontrolledOpen(next)
+    }
+  }
 
   function handleClose(): void {
     if (updateTask.isPending) {
@@ -44,9 +64,11 @@ export function UpdateTaskButton({ task }: { readonly task: Task }) {
 
   return (
     <>
-      <Button variant="ghost" size="sm" onClick={() => setIsOpen(true)}>
-        Изменить
-      </Button>
+      {showTrigger ? (
+        <Button variant="ghost" size="sm" onClick={() => setIsOpen(true)}>
+          Изменить
+        </Button>
+      ) : null}
 
       <Modal
         isOpen={isOpen}

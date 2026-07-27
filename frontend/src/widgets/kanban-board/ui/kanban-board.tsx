@@ -8,24 +8,27 @@ import {
   useSensors,
   type DragEndEvent,
   type DragStartEvent,
-  type DropAnimation,
 } from '@dnd-kit/core'
-import { CSS } from '@dnd-kit/utilities'
 import { LayoutGroup } from 'framer-motion'
-import {
-  TASK_STATUS,
-  TASK_STATUS_LABELS,
-  type Task,
-  type TaskStatus,
-} from '@/entities/task'
+import { TASK_STATUS_LABELS, type Task } from '@/entities/task'
 import { useChangeTaskStatusMutation } from '@/features/change-task-status'
+import { useDeleteTaskMutation } from '@/features/delete-task'
 import { getErrorMessage } from '@/shared/api'
 import { toast } from '@/shared/ui'
+import {
+  DROP_FADE_MS,
+  dropAnimation,
+  resolveTargetStatus,
+} from '../lib/kanban-dnd'
 import {
   KANBAN_COLUMN_ORDER,
   groupTasksByStatus,
 } from '../lib/group-tasks-by-status'
 import { KanbanColumn } from './kanban-column'
+import {
+  KANBAN_DANGER_ZONE_ID,
+  KanbanDangerZone,
+} from './kanban-danger-zone'
 import { TaskCard } from './task-card'
 
 interface KanbanBoardProps {
@@ -33,54 +36,9 @@ interface KanbanBoardProps {
   readonly onTaskDeleted?: () => void
 }
 
-const DROP_FADE_MS = 180
-
-/** Fade out in place — без анимации «назад» к старой колонке. */
-const dropAnimation: DropAnimation = {
-  duration: DROP_FADE_MS,
-  easing: 'ease-out',
-  keyframes({ transform }) {
-    return [
-      {
-        opacity: 1,
-        transform: CSS.Transform.toString(transform.initial),
-      },
-      {
-        opacity: 0,
-        transform: CSS.Transform.toString({
-          ...transform.initial,
-          scaleX: 0.98,
-          scaleY: 0.98,
-        }),
-      },
-    ]
-  },
-}
-
-function isTaskStatus(value: string): value is TaskStatus {
-  return (
-    value === TASK_STATUS.TODO ||
-    value === TASK_STATUS.IN_PROGRESS ||
-    value === TASK_STATUS.DONE
-  )
-}
-
-function resolveTargetStatus(
-  overId: string | number,
-  tasksById: ReadonlyMap<string, Task>,
-): TaskStatus | null {
-  const id = String(overId)
-
-  if (isTaskStatus(id)) {
-    return id
-  }
-
-  return tasksById.get(id)?.status ?? null
-}
-
 export function KanbanBoard({ tasks, onTaskDeleted }: KanbanBoardProps) {
   const changeStatus = useChangeTaskStatusMutation()
-  // Snapshot на время drag+fade, чтобы overlay не зависел от optimistic cache.
+  const deleteTask = useDeleteTaskMutation()
   const [activeTask, setActiveTask] = useState<Task | null>(null)
   const fadeTimeoutRef = useRef<number | null>(null)
 
@@ -110,8 +68,7 @@ export function KanbanBoard({ tasks, onTaskDeleted }: KanbanBoardProps) {
   }
 
   function handleDragStart(event: DragStartEvent): void {
-    const task = tasksById.get(String(event.active.id)) ?? null
-    setActiveTask(task)
+    setActiveTask(tasksById.get(String(event.active.id)) ?? null)
   }
 
   function handleDragEnd(event: DragEndEvent): void {
@@ -124,6 +81,23 @@ export function KanbanBoard({ tasks, onTaskDeleted }: KanbanBoardProps) {
       return
     }
 
+    if (String(over.id) === KANBAN_DANGER_ZONE_ID) {
+      deleteTask.mutate(taskId, {
+        onSuccess: () => {
+          toast.success(`«${task.title}» удалена`, 'Удалено')
+          onTaskDeleted?.()
+        },
+        onError: (error: unknown) => {
+          toast.error(
+            getErrorMessage(error, 'Не удалось удалить задачу'),
+            'Ошибка',
+          )
+        },
+      })
+      clearActiveTaskAfterFade()
+      return
+    }
+
     const nextStatus = resolveTargetStatus(over.id, tasksById)
 
     if (!nextStatus || nextStatus === task.status) {
@@ -131,8 +105,6 @@ export function KanbanBoard({ tasks, onTaskDeleted }: KanbanBoardProps) {
       return
     }
 
-    // Сначала optimistic — карточка уже в новой колонке под overlay.
-    // Затем fade overlay на месте (без полёта к старой DOM-позиции).
     changeStatus.mutate(
       { id: taskId, status: nextStatus },
       {
@@ -154,20 +126,16 @@ export function KanbanBoard({ tasks, onTaskDeleted }: KanbanBoardProps) {
     clearActiveTaskAfterFade()
   }
 
-  function handleDragCancel(): void {
-    clearActiveTaskAfterFade()
-  }
-
   return (
     <DndContext
       sensors={sensors}
       collisionDetection={closestCorners}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
-      onDragCancel={handleDragCancel}
+      onDragCancel={clearActiveTaskAfterFade}
     >
       <LayoutGroup>
-        <div className="flex gap-3 overflow-x-auto pb-1 lg:items-start">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-[repeat(3,minmax(280px,1fr))]">
           {KANBAN_COLUMN_ORDER.map((status) => (
             <KanbanColumn
               key={status}
@@ -179,6 +147,8 @@ export function KanbanBoard({ tasks, onTaskDeleted }: KanbanBoardProps) {
           ))}
         </div>
       </LayoutGroup>
+
+      <KanbanDangerZone isVisible={activeTask !== null} />
 
       <DragOverlay dropAnimation={dropAnimation}>
         {activeTask ? <TaskCard task={activeTask} isDragOverlay /> : null}

@@ -27,7 +27,10 @@ export function Select({
       {...props}
     >
       {options.map((option) => (
-        <option key={option.value} value={option.value}>
+        <option
+          key={option.value === '' ? '__empty' : option.value}
+          value={option.value}
+        >
           {option.label}
         </option>
       ))}

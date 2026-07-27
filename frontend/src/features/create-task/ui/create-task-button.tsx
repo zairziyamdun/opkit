@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Plus } from 'lucide-react'
 import {
   applyTaskFieldErrors,
   TaskForm,
@@ -39,7 +40,10 @@ export function CreateTaskButton() {
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)}>Создать задачу</Button>
+      <Button onClick={() => setIsOpen(true)}>
+        <Plus className="size-4" aria-hidden />
+        Создать задачу
+      </Button>
 
       <Modal
         isOpen={isOpen}
