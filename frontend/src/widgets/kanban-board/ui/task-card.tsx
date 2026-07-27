@@ -1,36 +1,22 @@
 import type { CSSProperties } from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
-import {
-  TASK_PRIORITY,
-  TASK_PRIORITY_LABELS,
-  type Task,
-  type TaskPriority,
-} from '@/entities/task'
+import { GripVertical } from 'lucide-react'
+import { TASK_PRIORITY_LABELS, type Task } from '@/entities/task'
 import { DeleteTaskButton } from '@/features/delete-task'
 import { UpdateTaskButton } from '@/features/update-task'
 import { cn } from '@/shared/lib/cn'
+import {
+  PRIORITY_ACCENT,
+  PRIORITY_META,
+  formatRelativeDate,
+} from '../lib/task-card-styles'
 
 interface TaskCardProps {
   readonly task: Task
   readonly isDragOverlay?: boolean
   readonly isDragPlaceholder?: boolean
   readonly onDeleted?: () => void
-}
-
-const PRIORITY_STYLES: Record<TaskPriority, string> = {
-  [TASK_PRIORITY.LOW]: 'border-priority-low/30 bg-muted text-priority-low',
-  [TASK_PRIORITY.MEDIUM]:
-    'border-priority-medium/30 bg-warning/10 text-priority-medium',
-  [TASK_PRIORITY.HIGH]:
-    'border-priority-high/30 bg-destructive/10 text-priority-high',
-}
-
-function formatDate(value: string): string {
-  return new Intl.DateTimeFormat('ru-RU', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date(value))
 }
 
 interface TaskCardContentProps {
@@ -59,56 +45,75 @@ function TaskCardContent({
   listeners,
 }: TaskCardContentProps) {
   const isHiddenPlaceholder = isDragging || isDragPlaceholder
+  const priority = PRIORITY_META[task.priority]
+  const PriorityIcon = priority.icon
 
   return (
     <article
       ref={setNodeRef}
       style={style}
       className={cn(
-        'rounded-card border border-border bg-card p-4 shadow-card transition-[opacity,box-shadow,border-color] duration-150 ease-out',
-        !isHiddenPlaceholder &&
-          !isDragOverlay &&
-          'hover:border-border-hover',
+        'group rounded-[8px] border border-transparent border-l-[3px] bg-card shadow-card transition-[box-shadow,transform,opacity] duration-150 ease-out',
+        PRIORITY_ACCENT[task.priority],
+        !isHiddenPlaceholder && !isDragOverlay && 'hover:shadow-card-hover',
         isHiddenPlaceholder && 'pointer-events-none opacity-0',
         isDragOverlay &&
-          'rotate-2 scale-[1.02] opacity-100 shadow-modal ring-1 ring-border transition-none',
+          'rotate-[1.5deg] scale-[1.03] border-border opacity-100 shadow-drag ring-1 ring-border/80 transition-none',
       )}
     >
       <div
         className={cn(
-          'space-y-2',
+          'space-y-2 p-3',
           isDraggable && 'cursor-grab active:cursor-grabbing',
         )}
         {...listeners}
         {...attributes}
       >
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="text-small font-medium text-foreground">
-            {task.title}
-          </h3>
-          <span
+        <div className="flex items-start gap-1.5">
+          <GripVertical
             className={cn(
-              'inline-flex shrink-0 items-center rounded-full border px-2.5 py-0.5 text-caption font-medium',
-              PRIORITY_STYLES[task.priority],
+              'mt-0.5 size-4 shrink-0 text-placeholder transition-opacity',
+              isDraggable || isDragOverlay
+                ? 'opacity-50 group-hover:opacity-100'
+                : 'opacity-0',
             )}
-          >
-            {TASK_PRIORITY_LABELS[task.priority]}
-          </span>
+            aria-hidden
+          />
+          <div className="min-w-0 flex-1 space-y-2">
+            <h3 className="text-small leading-snug font-semibold text-foreground">
+              {task.title}
+            </h3>
+
+            {task.description ? (
+              <p className="line-clamp-2 text-caption leading-relaxed text-muted-foreground">
+                {task.description}
+              </p>
+            ) : null}
+
+            <div className="flex items-center justify-between gap-2">
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1 text-caption font-medium',
+                  priority.className,
+                )}
+                title={`Приоритет: ${TASK_PRIORITY_LABELS[task.priority]}`}
+              >
+                <PriorityIcon className="size-3.5" aria-hidden />
+                {TASK_PRIORITY_LABELS[task.priority]}
+              </span>
+              <time
+                dateTime={task.updatedAt}
+                className="text-caption text-muted-foreground tabular-nums"
+              >
+                {formatRelativeDate(task.updatedAt)}
+              </time>
+            </div>
+          </div>
         </div>
-
-        {task.description ? (
-          <p className="line-clamp-3 text-small text-muted-foreground">
-            {task.description}
-          </p>
-        ) : null}
-
-        <p className="text-caption text-muted-foreground">
-          Обновлена {formatDate(task.updatedAt)}
-        </p>
       </div>
 
       {!isDragOverlay ? (
-        <div className="mt-3 flex items-center gap-2">
+        <div className="flex items-center gap-1.5 border-t border-border/60 px-2 py-1.5">
           <UpdateTaskButton task={task} />
           <DeleteTaskButton task={task} onDeleted={onDeleted} />
         </div>

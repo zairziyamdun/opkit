@@ -36,7 +36,12 @@ export function DeleteTaskButton({ task, onDeleted }: DeleteTaskButtonProps) {
 
   return (
     <>
-      <Button variant="destructive" size="sm" onClick={() => setIsOpen(true)}>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+        onClick={() => setIsOpen(true)}
+      >
         Удалить
       </Button>
 

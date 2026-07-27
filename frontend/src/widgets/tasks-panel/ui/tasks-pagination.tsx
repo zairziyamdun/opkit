@@ -13,9 +13,21 @@ export function TasksPagination({
   onPageChange,
 }: TasksPaginationProps) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3">
-      <p className="text-small text-muted-foreground">
-        Страница {meta.page} из {meta.totalPages} · всего {meta.total}
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card px-4 py-2.5 shadow-card">
+      <p className="text-caption text-muted-foreground">
+        Страница{' '}
+        <span className="font-semibold text-foreground-body tabular-nums">
+          {meta.page}
+        </span>{' '}
+        из{' '}
+        <span className="font-semibold text-foreground-body tabular-nums">
+          {meta.totalPages}
+        </span>
+        <span className="mx-2 text-border-hover">·</span>
+        Всего{' '}
+        <span className="font-semibold text-foreground-body tabular-nums">
+          {meta.total}
+        </span>
       </p>
       <div className="flex items-center gap-2">
         <Button

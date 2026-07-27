@@ -167,7 +167,7 @@ export function KanbanBoard({ tasks, onTaskDeleted }: KanbanBoardProps) {
       onDragCancel={handleDragCancel}
     >
       <LayoutGroup>
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+        <div className="flex gap-3 overflow-x-auto pb-1 lg:items-start">
           {KANBAN_COLUMN_ORDER.map((status) => (
             <KanbanColumn
               key={status}

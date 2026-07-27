@@ -44,7 +44,7 @@ export function UpdateTaskButton({ task }: { readonly task: Task }) {
 
   return (
     <>
-      <Button variant="outline" size="sm" onClick={() => setIsOpen(true)}>
+      <Button variant="ghost" size="sm" onClick={() => setIsOpen(true)}>
         Изменить
       </Button>
 
