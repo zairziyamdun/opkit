@@ -10,7 +10,7 @@ import {
 } from '@/entities/task'
 import { useDebouncedValue } from '@/shared/lib/use-debounced-value'
 
-const DEFAULT_LIMIT = 10
+const DEFAULT_LIMIT = 6
 const FIRST_PAGE = 1
 
 export function useTaskListFilters() {
