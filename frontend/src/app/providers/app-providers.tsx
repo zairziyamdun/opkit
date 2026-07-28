@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { AuthBootstrapProvider } from '@/app/providers/auth-bootstrap-provider'
 import { QueryProvider } from '@/app/providers/query-provider'
 import { RouterProvider } from '@/app/providers/router-provider'
 import { SocketProvider } from '@/app/providers/socket'
@@ -12,14 +13,16 @@ interface AppProvidersProps {
 export function AppProviders({ children }: AppProvidersProps) {
   return (
     <QueryProvider>
-      <RouterProvider>
-        <SocketProvider>
-          <TaskRealtimeProvider>
-            {children}
-            <Toaster />
-          </TaskRealtimeProvider>
-        </SocketProvider>
-      </RouterProvider>
+      <AuthBootstrapProvider>
+        <RouterProvider>
+          <SocketProvider>
+            <TaskRealtimeProvider>
+              {children}
+              <Toaster />
+            </TaskRealtimeProvider>
+          </SocketProvider>
+        </RouterProvider>
+      </AuthBootstrapProvider>
     </QueryProvider>
   )
 }

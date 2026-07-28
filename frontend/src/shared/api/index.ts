@@ -1,2 +1,2 @@
-export { apiClient } from './api-client'
+export { apiClient, refreshSessionRequest } from './api-client'
 export { getErrorMessage, isApiError, toApiError } from './error'

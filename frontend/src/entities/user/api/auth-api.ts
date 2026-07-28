@@ -27,3 +27,7 @@ export async function getCurrentUserRequest(): Promise<User> {
   const { data } = await apiClient.get<User>('/auth/me')
   return data
 }
+
+export async function logoutRequest(): Promise<void> {
+  await apiClient.post('/auth/logout')
+}

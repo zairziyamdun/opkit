@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { userQueryKeys } from '@/entities/user'
+import { logoutRequest, userQueryKeys } from '@/entities/user'
 import { disconnectSocket } from '@/shared/api/socket'
 import { ROUTES } from '@/shared/config/routes'
 import { clearAccessToken } from '@/shared/lib/auth-token'
@@ -10,8 +10,14 @@ export function useLogoutMutation() {
   const navigate = useNavigate()
 
   return useMutation({
-    mutationFn: async () => undefined,
-    onSuccess: () => {
+    mutationFn: async () => {
+      try {
+        await logoutRequest()
+      } catch {
+        // Даже при ошибке сети очищаем локальную сессию.
+      }
+    },
+    onSettled: () => {
       disconnectSocket()
       clearAccessToken()
       queryClient.setQueryData(userQueryKeys.me(), null)
