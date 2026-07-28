@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { Link } from 'react-router-dom'
 import {
   registerSchema,
@@ -9,17 +9,20 @@ import { useRegisterMutation } from '@/features/register/model/use-register'
 import { getErrorMessage, isApiError } from '@/shared/api'
 import { ROUTES } from '@/shared/config/routes'
 import { Alert, Button, Input, Label } from '@/shared/ui'
+import { PasswordStrengthMeter } from './password-strength-meter'
 
 export function RegisterForm() {
   const registerMutation = useRegisterMutation()
 
   const {
     register,
+    control,
     handleSubmit,
     setError,
     formState: { errors },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
+    mode: 'onChange',
     defaultValues: {
       name: '',
       email: '',
@@ -28,9 +31,11 @@ export function RegisterForm() {
     },
   })
 
-  const onSubmit = handleSubmit(async ({ name, email, password }) => {
+  const password = useWatch({ control, name: 'password' }) ?? ''
+
+  const onSubmit = handleSubmit(async ({ name, email, password: value }) => {
     try {
-      await registerMutation.mutateAsync({ name, email, password })
+      await registerMutation.mutateAsync({ name, email, password: value })
     } catch (error: unknown) {
       if (isApiError(error) && error.fieldErrors.length > 0) {
         for (const fieldError of error.fieldErrors) {
@@ -87,6 +92,7 @@ export function RegisterForm() {
           hasError={Boolean(errors.password)}
           {...register('password')}
         />
+        <PasswordStrengthMeter password={password} />
         {errors.password ? (
           <p className="text-sm text-destructive">{errors.password.message}</p>
         ) : null}

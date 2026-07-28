@@ -1,4 +1,8 @@
 import { z } from 'zod'
+import {
+  PASSWORD_MAX_LENGTH,
+  getFirstFailedPasswordRule,
+} from './password-strength'
 
 export const registerSchema = z
   .object({
@@ -14,8 +18,18 @@ export const registerSchema = z
       .email('Некорректный email'),
     password: z
       .string()
-      .min(8, 'Пароль должен содержать минимум 8 символов')
-      .max(72, 'Пароль слишком длинный'),
+      .min(1, 'Введите пароль')
+      .max(PASSWORD_MAX_LENGTH, 'Пароль слишком длинный')
+      .superRefine((password, context) => {
+        const failedRule = getFirstFailedPasswordRule(password)
+
+        if (failedRule) {
+          context.addIssue({
+            code: 'custom',
+            message: failedRule.label,
+          })
+        }
+      }),
     confirmPassword: z.string().min(1, 'Подтвердите пароль'),
   })
   .refine((values) => values.password === values.confirmPassword, {
