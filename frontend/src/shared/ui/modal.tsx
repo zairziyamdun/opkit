@@ -44,7 +44,7 @@ export function Modal({
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4">
       <button
         type="button"
         aria-label="Закрыть"
@@ -55,7 +55,7 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative z-10 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-modal border border-border bg-card p-6 shadow-modal"
+        className="relative z-10 max-h-[92svh] w-full max-w-lg overflow-y-auto rounded-t-modal border border-border bg-card p-4 shadow-modal sm:rounded-modal sm:p-6"
       >
         <h2
           id={titleId}

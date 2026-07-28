@@ -40,7 +40,7 @@ export function CreateTaskButton() {
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)}>
+      <Button className="w-full sm:w-auto" onClick={() => setIsOpen(true)}>
         <Plus className="size-4" aria-hidden />
         Создать задачу
       </Button>

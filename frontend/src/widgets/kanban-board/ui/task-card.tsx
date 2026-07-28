@@ -61,53 +61,54 @@ function TaskCardContent({
           'rotate-[1.5deg] scale-[1.02] opacity-100 shadow-drag ring-1 ring-border transition-none',
       )}
     >
-      <div
-        className={cn(
-          'flex items-start gap-1 p-3',
-          isDraggable && 'cursor-grab touch-none active:cursor-grabbing',
-        )}
-        aria-label={isDraggable ? 'Перетащить задачу' : undefined}
-        {...(isDraggable ? listeners : undefined)}
-        {...(isDraggable ? attributes : undefined)}
-      >
-        <span className="mt-0.5 shrink-0 rounded p-0.5 text-placeholder">
-          <GripVertical className="size-4" aria-hidden />
-        </span>
+      <div className="flex items-start gap-1 p-3">
+        <div
+          className={cn(
+            'flex min-w-0 flex-1 items-start gap-1',
+            isDraggable && 'cursor-grab touch-none active:cursor-grabbing',
+          )}
+          aria-label={isDraggable ? 'Перетащить задачу' : undefined}
+          {...(isDraggable ? listeners : undefined)}
+          {...(isDraggable ? attributes : undefined)}
+        >
+          <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-md text-placeholder">
+            <GripVertical className="size-4" aria-hidden />
+          </span>
 
-        <div className="min-w-0 flex-1 space-y-2">
-          <div className="flex items-start justify-between gap-2">
-            <h3 className="text-[15px] leading-snug font-semibold text-foreground">
+          <div className="min-w-0 flex-1 space-y-2 py-0.5">
+            <h3 className="break-words pr-1 text-[15px] leading-snug font-semibold text-foreground">
               {task.title}
             </h3>
-            {!isDragOverlay ? (
-              <TaskCardMenu task={task} onDeleted={onDeleted} />
+
+            {task.description ? (
+              <p className="line-clamp-2 break-words text-caption leading-relaxed text-muted-foreground">
+                {task.description}
+              </p>
             ) : null}
-          </div>
 
-          {task.description ? (
-            <p className="line-clamp-2 text-caption leading-relaxed text-muted-foreground">
-              {task.description}
-            </p>
-          ) : null}
-
-          <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-            <span
-              className={cn(
-                'inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-caption font-medium',
-                PRIORITY_BADGE[task.priority],
-              )}
-            >
-              <PriorityIcon className="size-3" aria-hidden />
-              {TASK_PRIORITY_LABELS[task.priority]}
-            </span>
-            <time
-              dateTime={task.updatedAt}
-              className="inline-flex rounded-md bg-muted px-1.5 py-0.5 text-caption font-medium text-muted-foreground tabular-nums"
-            >
-              {formatRelativeDate(task.updatedAt)}
-            </time>
+            <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-caption font-medium',
+                  PRIORITY_BADGE[task.priority],
+                )}
+              >
+                <PriorityIcon className="size-3" aria-hidden />
+                {TASK_PRIORITY_LABELS[task.priority]}
+              </span>
+              <time
+                dateTime={task.updatedAt}
+                className="inline-flex rounded-md bg-muted px-1.5 py-0.5 text-caption font-medium text-muted-foreground tabular-nums"
+              >
+                {formatRelativeDate(task.updatedAt)}
+              </time>
+            </div>
           </div>
         </div>
+
+        {!isDragOverlay ? (
+          <TaskCardMenu task={task} onDeleted={onDeleted} />
+        ) : null}
       </div>
     </article>
   )

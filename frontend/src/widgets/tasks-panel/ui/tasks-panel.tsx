@@ -21,9 +21,9 @@ export function TasksPanel() {
 
   return (
     <section className="flex flex-1 flex-col gap-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
         <div className="min-w-0 space-y-1">
-          <div className="flex items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2.5">
             <h1 className="text-h2 font-semibold tracking-tight text-foreground">
               Задачи
             </h1>
@@ -38,7 +38,9 @@ export function TasksPanel() {
             Управляйте задачами и отслеживайте прогресс
           </p>
         </div>
-        <CreateTaskButton />
+        <div className="w-full sm:w-auto">
+          <CreateTaskButton />
+        </div>
       </div>
 
       <TasksFilters filters={filters} />

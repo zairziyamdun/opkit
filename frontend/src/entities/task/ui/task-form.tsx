@@ -118,15 +118,16 @@ export function TaskForm({
         <Alert variant="destructive">{errorMessage}</Alert>
       ) : null}
 
-      <div className="flex justify-end gap-2">
+      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Button
           variant="outline"
+          className="w-full sm:w-auto"
           onClick={onCancel}
           disabled={isPending}
         >
           Отмена
         </Button>
-        <Button type="submit" isLoading={isPending}>
+        <Button type="submit" className="w-full sm:w-auto" isLoading={isPending}>
           {submitLabel}
         </Button>
       </div>

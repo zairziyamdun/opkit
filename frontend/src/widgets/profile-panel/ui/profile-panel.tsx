@@ -55,17 +55,17 @@ export function ProfilePanel() {
         </p>
       </div>
 
-      <div className="rounded-card border border-border bg-card p-6 shadow-card">
+      <div className="rounded-card border border-border bg-card p-4 shadow-card sm:p-6">
         <dl className="space-y-4">
           <div className="space-y-1">
             <dt className="text-small text-muted-foreground">Имя</dt>
-            <dd className="text-small font-medium text-foreground">
+            <dd className="break-words text-small font-medium text-foreground">
               {user.name}
             </dd>
           </div>
           <div className="space-y-1">
             <dt className="text-small text-muted-foreground">Email</dt>
-            <dd className="text-small font-medium text-foreground">
+            <dd className="break-all text-small font-medium text-foreground">
               {user.email}
             </dd>
           </div>

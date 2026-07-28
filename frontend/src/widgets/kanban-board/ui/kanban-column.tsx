@@ -53,7 +53,7 @@ export function KanbanColumn({
     <section
       ref={setNodeRef}
       className={cn(
-        'flex min-h-64 min-w-0 flex-col rounded-xl border border-border/70 bg-card transition-shadow duration-150',
+        'flex min-h-52 min-w-0 flex-col rounded-xl border border-border/70 bg-card transition-shadow duration-150 sm:min-h-64',
         isOver && COLUMN_OVER[status],
       )}
     >

@@ -24,17 +24,17 @@ const FEATURES = [
 
 export function HomeFeatures() {
   return (
-    <section className="border-t border-border py-14 sm:py-16">
+    <section className="border-t border-border py-10 sm:py-16">
       <div className="mx-auto max-w-3xl text-center">
         <h2 className="text-h2 font-semibold tracking-tight text-foreground">
           Всё для ежедневной работы с задачами
         </h2>
-        <p className="mt-3 text-body text-muted-foreground">
+        <p className="mt-3 text-small text-muted-foreground sm:text-body">
           OpKit собирает доску, статусы и live-обновления в одном спокойном интерфейсе.
         </p>
       </div>
 
-      <div className="mt-10 grid gap-10 sm:grid-cols-3 sm:gap-8">
+      <div className="mt-8 grid gap-8 sm:mt-10 sm:grid-cols-3 sm:gap-8">
         {FEATURES.map((feature, index) => {
           const Icon = feature.icon
 

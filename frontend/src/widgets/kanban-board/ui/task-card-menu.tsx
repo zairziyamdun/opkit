@@ -54,7 +54,7 @@ export function TaskCardMenu({ task, onDeleted }: TaskCardMenuProps) {
         aria-haspopup="menu"
         aria-expanded={isMenuOpen}
         aria-controls={menuId}
-        className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:p-1.5"
         onClick={(event) => {
           event.stopPropagation()
           setIsMenuOpen((prev) => !prev)

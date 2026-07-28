@@ -8,13 +8,13 @@ export function HomeCta() {
   const { isAuthenticated } = useAuthSession()
 
   return (
-    <section className="border-t border-border py-14 sm:py-16">
+    <section className="border-t border-border py-10 sm:py-16">
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-40px' }}
         transition={{ duration: 0.4 }}
-        className="relative overflow-hidden rounded-2xl bg-foreground px-6 py-12 text-center sm:px-10"
+        className="relative overflow-hidden rounded-2xl bg-foreground px-5 py-10 text-center sm:px-10 sm:py-12"
       >
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgb(99_102_241_/_0.35),transparent_50%)]" />
         <div className="relative mx-auto max-w-2xl">
@@ -23,38 +23,38 @@ export function HomeCta() {
               ? 'Доска уже ждёт вас'
               : 'Начните вести задачи за минуту'}
           </h2>
-          <p className="mt-3 text-body text-primary-foreground/75">
+          <p className="mt-3 text-small text-primary-foreground/75 sm:text-body">
             {isAuthenticated
               ? 'Вернитесь к Kanban и продолжите с того места, где остановились.'
               : 'Создайте аккаунт, добавьте первую задачу и следите за прогрессом в реальном времени.'}
           </p>
-          <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+          <div className="mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">
             {isAuthenticated ? (
-              <Link to={ROUTES.tasks}>
+              <Link to={ROUTES.tasks} className="w-full sm:w-auto">
                 <Button
                   size="lg"
-                  className="bg-card text-foreground hover:bg-muted"
+                  className="w-full bg-card text-foreground hover:bg-muted sm:w-auto"
                 >
                   Открыть задачи
                 </Button>
               </Link>
             ) : (
               <>
-                <Link to={ROUTES.register}>
+                <Link to={ROUTES.register} className="w-full sm:w-auto">
                   <Button
                     size="lg"
-                    className="bg-card text-foreground hover:bg-muted"
+                    className="w-full bg-card text-foreground hover:bg-muted sm:w-auto"
                   >
                     Создать аккаунт
                   </Button>
                 </Link>
-                <Link to={ROUTES.login}>
+                <Link to={ROUTES.login} className="w-full sm:w-auto">
                   <Button
                     size="lg"
                     variant="outline"
-                    className="border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10"
+                    className="w-full border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 sm:w-auto"
                   >
-                    У меня уже есть аккаунт
+                    Уже есть аккаунт
                   </Button>
                 </Link>
               </>

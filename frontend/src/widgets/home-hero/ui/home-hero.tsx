@@ -89,36 +89,40 @@ export function HomeHero() {
         <p className="text-[clamp(2.75rem,8vw,4.5rem)] leading-none font-bold tracking-tight text-foreground">
           OpKit
         </p>
-        <h1 className="mt-4 text-h2 font-semibold tracking-tight text-foreground sm:text-h1">
+        <h1 className="mt-4 break-words text-h2 font-semibold tracking-tight text-foreground sm:text-h1">
           {isAuthenticated && user
             ? `С возвращением, ${user.name}`
             : 'Задачи под контролем — в реальном времени'}
         </h1>
-        <p className="mx-auto mt-3 max-w-xl text-body text-muted-foreground">
+        <p className="mx-auto mt-3 max-w-xl text-small text-muted-foreground sm:text-body">
           {isAuthenticated
             ? 'Откройте доску и продолжите работу с задачами без потери контекста.'
             : 'Mini CRM с Kanban, фильтрами и мгновенной синхронизацией между вкладками.'}
         </p>
 
-        <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+        <div className="mt-7 flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">
           {isAuthenticated ? (
             <>
-              <Link to={ROUTES.tasks}>
-                <Button size="lg">Перейти к задачам</Button>
+              <Link to={ROUTES.tasks} className="w-full sm:w-auto">
+                <Button size="lg" className="w-full sm:w-auto">
+                  Перейти к задачам
+                </Button>
               </Link>
-              <Link to={ROUTES.profile}>
-                <Button size="lg" variant="outline">
+              <Link to={ROUTES.profile} className="w-full sm:w-auto">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto">
                   Профиль
                 </Button>
               </Link>
             </>
           ) : (
             <>
-              <Link to={ROUTES.register}>
-                <Button size="lg">Начать бесплатно</Button>
+              <Link to={ROUTES.register} className="w-full sm:w-auto">
+                <Button size="lg" className="w-full sm:w-auto">
+                  Начать бесплатно
+                </Button>
               </Link>
-              <Link to={ROUTES.login}>
-                <Button size="lg" variant="outline">
+              <Link to={ROUTES.login} className="w-full sm:w-auto">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto">
                   Войти
                 </Button>
               </Link>

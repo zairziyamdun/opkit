@@ -13,7 +13,7 @@ export function TasksPagination({
   onPageChange,
 }: TasksPaginationProps) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card px-4 py-2.5 shadow-card">
+    <div className="flex flex-col gap-3 rounded-xl border border-border bg-card px-4 py-3 shadow-card sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:py-2.5">
       <p className="text-caption text-muted-foreground">
         Страница{' '}
         <span className="font-semibold text-foreground-body tabular-nums">
@@ -29,10 +29,10 @@ export function TasksPagination({
           {meta.total}
         </span>
       </p>
-      <div className="flex items-center gap-2">
+      <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
         <Button
           variant="outline"
-          size="sm"
+          className="h-10 sm:h-8"
           disabled={!meta.hasPreviousPage || isFetching}
           onClick={() => onPageChange(meta.page - 1)}
         >
@@ -40,7 +40,7 @@ export function TasksPagination({
         </Button>
         <Button
           variant="outline"
-          size="sm"
+          className="h-10 sm:h-8"
           disabled={!meta.hasNextPage || isFetching}
           onClick={() => onPageChange(meta.page + 1)}
         >

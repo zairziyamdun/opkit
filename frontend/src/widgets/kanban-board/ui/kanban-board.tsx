@@ -190,7 +190,7 @@ export function KanbanBoard({ tasks, onTaskDeleted }: KanbanBoardProps) {
       onDragCancel={clearActiveTaskAfterFade}
     >
       <LayoutGroup>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-[repeat(3,minmax(280px,1fr))]">
+        <div className="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-3 lg:gap-4">
           {KANBAN_COLUMN_ORDER.map((status) => (
             <KanbanColumn
               key={status}

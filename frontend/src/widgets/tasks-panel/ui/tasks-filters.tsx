@@ -38,8 +38,8 @@ export function TasksFilters({ filters }: { readonly filters: TaskListFilters })
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <div className="relative w-full max-w-[400px] min-w-[240px] flex-1 basis-[320px]">
+    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+      <div className="relative w-full sm:max-w-[400px] sm:min-w-[220px] sm:flex-1 sm:basis-[280px]">
         <Search
           className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-placeholder"
           aria-hidden
@@ -47,7 +47,7 @@ export function TasksFilters({ filters }: { readonly filters: TaskListFilters })
         <Input
           id="tasks-search"
           type="search"
-          className="h-9 pl-9"
+          className="h-10 pl-9 sm:h-9"
           placeholder="Поиск задач"
           aria-label="Поиск задач"
           value={filters.searchInput}
@@ -55,63 +55,74 @@ export function TasksFilters({ filters }: { readonly filters: TaskListFilters })
         />
       </div>
 
-      <Select
-        id="tasks-status"
-        className="h-9 w-[180px]"
-        aria-label="Статус"
-        options={STATUS_OPTIONS}
-        value={filters.status}
-        onChange={(event) =>
-          filters.onStatusChange(event.target.value as TaskStatus | '')
-        }
-      />
+      <div className="grid grid-cols-2 gap-2 sm:contents">
+        <Select
+          id="tasks-status"
+          className="h-10 w-full sm:h-9 sm:w-[160px] md:w-[180px]"
+          aria-label="Статус"
+          options={STATUS_OPTIONS}
+          value={filters.status}
+          onChange={(event) =>
+            filters.onStatusChange(event.target.value as TaskStatus | '')
+          }
+        />
 
-      <Select
-        id="tasks-priority"
-        className="h-9 w-[180px]"
-        aria-label="Приоритет"
-        options={PRIORITY_OPTIONS}
-        value={filters.priority}
-        onChange={(event) =>
-          filters.onPriorityChange(event.target.value as TaskPriority | '')
-        }
-      />
+        <Select
+          id="tasks-priority"
+          className="h-10 w-full sm:h-9 sm:w-[160px] md:w-[180px]"
+          aria-label="Приоритет"
+          options={PRIORITY_OPTIONS}
+          value={filters.priority}
+          onChange={(event) =>
+            filters.onPriorityChange(event.target.value as TaskPriority | '')
+          }
+        />
+      </div>
 
-      <Select
-        id="tasks-sort-by"
-        className="h-9 w-[200px]"
-        aria-label="Сортировка"
-        options={SORT_BY_OPTIONS}
-        value={filters.sortBy}
-        onChange={(event) =>
-          filters.onSortByChange(event.target.value as TaskSortBy)
-        }
-      />
+      <div className="flex gap-2 sm:contents">
+        <Select
+          id="tasks-sort-by"
+          className="h-10 min-w-0 flex-1 sm:h-9 sm:w-[200px] sm:flex-none"
+          aria-label="Сортировка"
+          options={SORT_BY_OPTIONS}
+          value={filters.sortBy}
+          onChange={(event) =>
+            filters.onSortByChange(event.target.value as TaskSortBy)
+          }
+        />
 
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        className="h-9 w-9 shrink-0 px-0"
-        aria-label={
-          filters.sortOrder === SORT_ORDER.Desc
-            ? 'Порядок: по убыванию. Переключить на возрастание'
-            : 'Порядок: по возрастанию. Переключить на убывание'
-        }
-        title={
-          filters.sortOrder === SORT_ORDER.Desc ? 'По убыванию' : 'По возрастанию'
-        }
-        onClick={toggleSortOrder}
-      >
-        <ArrowUpDown className="size-4" aria-hidden />
-      </Button>
-
-      {filters.hasActiveFilters ? (
-        <Button variant="ghost" size="sm" className="h-9" onClick={filters.reset}>
-          <X className="size-3.5" aria-hidden />
-          Сбросить
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="h-10 w-10 shrink-0 px-0 sm:h-9 sm:w-9"
+          aria-label={
+            filters.sortOrder === SORT_ORDER.Desc
+              ? 'Порядок: по убыванию. Переключить на возрастание'
+              : 'Порядок: по возрастанию. Переключить на убывание'
+          }
+          title={
+            filters.sortOrder === SORT_ORDER.Desc
+              ? 'По убыванию'
+              : 'По возрастанию'
+          }
+          onClick={toggleSortOrder}
+        >
+          <ArrowUpDown className="size-4" aria-hidden />
         </Button>
-      ) : null}
+
+        {filters.hasActiveFilters ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-10 sm:h-9"
+            onClick={filters.reset}
+          >
+            <X className="size-3.5" aria-hidden />
+            Сбросить
+          </Button>
+        ) : null}
+      </div>
     </div>
   )
 }

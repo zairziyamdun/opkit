@@ -77,9 +77,10 @@ export function DeleteTaskButton({
             </Alert>
           ) : null}
 
-          <div className="flex justify-end gap-2">
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <Button
               variant="outline"
+              className="w-full sm:w-auto"
               onClick={handleClose}
               disabled={deleteTask.isPending}
             >
@@ -87,6 +88,7 @@ export function DeleteTaskButton({
             </Button>
             <Button
               variant="destructive"
+              className="w-full sm:w-auto"
               isLoading={deleteTask.isPending}
               onClick={() => void handleConfirm()}
             >

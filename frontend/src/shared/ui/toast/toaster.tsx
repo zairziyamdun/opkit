@@ -13,7 +13,7 @@ export function Toaster() {
   return (
     <div
       aria-label="Уведомления"
-      className="pointer-events-none fixed right-4 bottom-4 z-[100] flex max-h-[calc(100svh-2rem)] w-[min(100vw-2rem,22rem)] flex-col-reverse gap-2 overflow-y-auto"
+      className="pointer-events-none fixed right-3 bottom-[max(1rem,env(safe-area-inset-bottom))] z-[100] flex max-h-[calc(100svh-2rem)] w-[min(100vw-1.5rem,22rem)] flex-col-reverse gap-2 overflow-y-auto sm:right-4"
     >
       <AnimatePresence initial={false} mode="popLayout">
         {items.map((item) => (
