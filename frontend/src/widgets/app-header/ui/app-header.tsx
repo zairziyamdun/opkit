@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { useAuthSession } from '@/entities/user'
+import { getUserInitials, useAuthSession } from '@/entities/user'
 import { LogoutButton } from '@/features/logout'
 import { ROUTES } from '@/shared/config/routes'
 import { Button } from '@/shared/ui'
@@ -28,14 +28,21 @@ export function AppHeader() {
                   Задачи
                 </Button>
               </Link>
-              <Link to={ROUTES.profile}>
-                <Button variant="ghost" className="h-10 px-3 sm:h-8 sm:px-3">
-                  Профиль
-                </Button>
+              <Link
+                to={ROUTES.profile}
+                className="inline-flex h-10 items-center gap-2 rounded-button px-2 text-small font-medium text-foreground-body transition-colors hover:bg-muted sm:h-8"
+                title="Профиль"
+              >
+                <span
+                  className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-caption font-semibold text-primary-foreground sm:size-6"
+                  aria-hidden
+                >
+                  {getUserInitials(user.name)}
+                </span>
+                <span className="hidden max-w-28 truncate sm:inline">
+                  {user.name}
+                </span>
               </Link>
-              <span className="hidden max-w-32 truncate text-small text-muted-foreground sm:inline">
-                {user.name}
-              </span>
               <LogoutButton className="h-10 sm:h-8" />
             </>
           ) : (

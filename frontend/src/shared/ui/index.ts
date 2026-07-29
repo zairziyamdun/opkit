@@ -1,5 +1,6 @@
 export { Alert } from './alert'
 export { Button } from './button'
+export type { ButtonProps } from './button'
 export { Input } from './input'
 export { Label } from './label'
 export { Modal } from './modal'
