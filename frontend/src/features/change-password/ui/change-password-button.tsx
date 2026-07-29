@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { KeyRound } from 'lucide-react'
 import { getErrorMessage } from '@/shared/api'
@@ -51,8 +51,8 @@ function ChangePasswordModal({ onClose }: ChangePasswordModalProps) {
 
   const {
     register,
+    control,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm<ChangePasswordFormValues>({
     resolver: zodResolver(changePasswordSchema),
@@ -63,8 +63,8 @@ function ChangePasswordModal({ onClose }: ChangePasswordModalProps) {
     },
   })
 
-  const newPassword = watch('newPassword')
-  const currentPassword = watch('currentPassword')
+  const newPassword = useWatch({ control, name: 'newPassword' }) ?? ''
+  const currentPassword = useWatch({ control, name: 'currentPassword' }) ?? ''
   const { status: currentPasswordStatus, message: currentPasswordMessage } =
     useVerifyCurrentPassword(currentPassword)
 
