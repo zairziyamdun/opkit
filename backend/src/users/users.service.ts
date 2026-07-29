@@ -28,4 +28,14 @@ export class UsersService {
       where: { email },
     });
   }
+
+  async updatePasswordHash(
+    userId: string,
+    passwordHash: string,
+  ): Promise<User> {
+    return this.prismaService.user.update({
+      where: { id: userId },
+      data: { passwordHash },
+    });
+  }
 }

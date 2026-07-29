@@ -33,6 +33,9 @@ const KNOWN_SERVER_MESSAGES: Readonly<Record<string, string>> = {
   'task not found': 'Задача не найдена.',
   'at least one field must be provided':
     'Укажите хотя бы одно поле для изменения.',
+  'invalid current password': 'Неверный текущий пароль.',
+  'new password must be different from the current password':
+    'Новый пароль должен отличаться от текущего.',
   unauthorized: 'Сеанс завершён. Войдите снова.',
   forbidden: 'У вас нет доступа к этому действию.',
   'bad request': 'Проверьте введённые данные и попробуйте снова.',

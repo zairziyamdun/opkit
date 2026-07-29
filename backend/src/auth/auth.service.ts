@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from 'node:crypto';
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   UnauthorizedException,
@@ -17,6 +18,7 @@ import {
   REFRESH_COOKIE_NAME,
 } from './constants/auth.constants';
 import { AuthResponseDto } from './dto/auth-response.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
@@ -113,6 +115,52 @@ export class AuthService {
     if (stored) {
       await this.refreshTokenRepository.revokeById(stored.id);
     }
+  }
+
+  async changePassword(
+    userId: string,
+    dto: ChangePasswordDto,
+  ): Promise<string> {
+    const user = await this.usersService.findById(userId);
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const isCurrentValid = await bcrypt.compare(
+      dto.currentPassword,
+      user.passwordHash,
+    );
+
+    if (!isCurrentValid) {
+      throw new BadRequestException('Invalid current password');
+    }
+
+    const isSamePassword = await bcrypt.compare(
+      dto.newPassword,
+      user.passwordHash,
+    );
+
+    if (isSamePassword) {
+      throw new BadRequestException(
+        'New password must be different from the current password',
+      );
+    }
+
+    const passwordHash = await bcrypt.hash(dto.newPassword, BCRYPT_SALT_ROUNDS);
+    await this.usersService.updatePasswordHash(user.id, passwordHash);
+    await this.refreshTokenRepository.revokeAllForUser(user.id);
+
+    const refreshToken = randomBytes(REFRESH_TOKEN_BYTES).toString('base64url');
+    const refreshDays = this.getRefreshTokenDays();
+
+    await this.refreshTokenRepository.create({
+      tokenHash: this.hashToken(refreshToken),
+      expiresAt: new Date(Date.now() + refreshDays * 24 * 60 * 60 * 1000),
+      user: { connect: { id: user.id } },
+    });
+
+    return refreshToken;
   }
 
   setRefreshCookie(response: Response, refreshToken: string): void {

@@ -4,12 +4,14 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Patch,
   Post,
   Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiConflictResponse,
   ApiCreatedResponse,
@@ -25,6 +27,7 @@ import { AuthService } from './auth.service';
 import { REFRESH_COOKIE_NAME } from './constants/auth.constants';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { AuthResponseDto } from './dto/auth-response.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -97,6 +100,25 @@ export class AuthController {
   @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
   me(@CurrentUser() user: UserEntity): UserEntity {
     return user;
+  }
+
+  @Patch('change-password')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Смена пароля текущего пользователя' })
+  @ApiNoContentResponse()
+  @ApiBadRequestResponse({
+    description: 'Неверный текущий пароль или новый совпадает с текущим',
+  })
+  @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
+  async changePassword(
+    @CurrentUser() user: UserEntity,
+    @Body() dto: ChangePasswordDto,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<void> {
+    const refreshToken = await this.authService.changePassword(user.id, dto);
+    this.authService.setRefreshCookie(response, refreshToken);
   }
 
   private readRefreshCookie(request: Request): string | undefined {
