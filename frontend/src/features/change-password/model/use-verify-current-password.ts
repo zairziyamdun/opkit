@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { getErrorMessage, isApiError } from '@/shared/api'
 import { useDebouncedValue } from '@/shared/lib/use-debounced-value'
 import { verifyPasswordRequest } from '../api/change-password-api'
 
@@ -9,9 +10,11 @@ export type CurrentPasswordStatus =
   | 'checking'
   | 'valid'
   | 'invalid'
+  | 'rate_limited'
 
 export function useVerifyCurrentPassword(password: string): {
   readonly status: CurrentPasswordStatus
+  readonly message: string | null
 } {
   const debouncedPassword = useDebouncedValue(password, VERIFY_DEBOUNCE_MS)
   const isSynced = password === debouncedPassword
@@ -26,18 +29,35 @@ export function useVerifyCurrentPassword(password: string): {
   })
 
   if (password.length === 0) {
-    return { status: 'idle' }
+    return { status: 'idle', message: null }
   }
 
   if (!isSynced || query.isFetching || query.isPending) {
-    return { status: 'checking' }
+    return { status: 'checking', message: null }
   }
 
   if (query.isError) {
-    return { status: 'idle' }
+    const isRateLimited =
+      isApiError(query.error) && query.error.statusCode === 429
+
+    if (isRateLimited) {
+      return {
+        status: 'rate_limited',
+        message: getErrorMessage(
+          query.error,
+          'Слишком много проверок. Подождите немного.',
+        ),
+      }
+    }
+
+    return {
+      status: 'idle',
+      message: getErrorMessage(query.error, 'Не удалось проверить пароль'),
+    }
   }
 
   return {
     status: query.data?.valid === true ? 'valid' : 'invalid',
+    message: null,
   }
 }

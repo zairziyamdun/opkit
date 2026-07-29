@@ -19,6 +19,7 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiTags,
+  ApiTooManyRequestsResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
@@ -33,6 +34,8 @@ import { RegisterDto } from './dto/register.dto';
 import { VerifyPasswordDto } from './dto/verify-password.dto';
 import { VerifyPasswordResponseDto } from './dto/verify-password-response.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { LoginRateLimitGuard } from './guards/login-rate-limit.guard';
+import { VerifyPasswordRateLimitGuard } from './guards/verify-password-rate-limit.guard';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -53,10 +56,14 @@ export class AuthController {
   }
 
   @Post('login')
+  @UseGuards(LoginRateLimitGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Вход по email и паролю' })
   @ApiOkResponse({ type: AuthResponseDto })
   @ApiUnauthorizedResponse({ description: 'Неверные учётные данные' })
+  @ApiTooManyRequestsResponse({
+    description: 'Превышен лимит попыток входа (15 в минуту с одного IP)',
+  })
   async login(
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) response: Response,
@@ -124,11 +131,14 @@ export class AuthController {
   }
 
   @Post('verify-password')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, VerifyPasswordRateLimitGuard)
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Проверить текущий пароль пользователя' })
   @ApiOkResponse({ type: VerifyPasswordResponseDto })
+  @ApiTooManyRequestsResponse({
+    description: 'Превышен лимит проверок пароля (15 в минуту)',
+  })
   @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
   verifyPassword(
     @CurrentUser() user: UserEntity,

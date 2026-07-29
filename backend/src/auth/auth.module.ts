@@ -8,6 +8,8 @@ import { AuthService } from './auth.service';
 import { DEFAULT_ACCESS_TOKEN_SECONDS } from './constants/auth.constants';
 import { RefreshTokenRepository } from './repository/refresh-token.repository';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { LoginRateLimitGuard } from './guards/login-rate-limit.guard';
+import { VerifyPasswordRateLimitGuard } from './guards/verify-password-rate-limit.guard';
 
 function resolveAccessTokenSeconds(configService: ConfigService): number {
   const raw = configService.get<string | number>('JWT_ACCESS_EXPIRES_SECONDS');
@@ -36,7 +38,13 @@ function resolveAccessTokenSeconds(configService: ConfigService): number {
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, RefreshTokenRepository],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    RefreshTokenRepository,
+    LoginRateLimitGuard,
+    VerifyPasswordRateLimitGuard,
+  ],
   exports: [JwtModule],
 })
 export class AuthModule {}

@@ -36,6 +36,10 @@ const KNOWN_SERVER_MESSAGES: Readonly<Record<string, string>> = {
   'invalid current password': 'Неверный текущий пароль.',
   'new password must be different from the current password':
     'Новый пароль должен отличаться от текущего.',
+  'too many password verification attempts':
+    'Слишком много проверок. Подождите немного.',
+  'too many login attempts':
+    'Слишком много попыток входа. Подождите немного.',
   unauthorized: 'Сеанс завершён. Войдите снова.',
   forbidden: 'У вас нет доступа к этому действию.',
   'bad request': 'Проверьте введённые данные и попробуйте снова.',

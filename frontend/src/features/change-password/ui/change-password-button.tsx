@@ -65,7 +65,7 @@ function ChangePasswordModal({ onClose }: ChangePasswordModalProps) {
 
   const newPassword = watch('newPassword')
   const currentPassword = watch('currentPassword')
-  const { status: currentPasswordStatus } =
+  const { status: currentPasswordStatus, message: currentPasswordMessage } =
     useVerifyCurrentPassword(currentPassword)
 
   const isCurrentPasswordValid = currentPasswordStatus === 'valid'
@@ -123,7 +123,18 @@ function ChangePasswordModal({ onClose }: ChangePasswordModalProps) {
           {currentPasswordStatus === 'invalid' ? (
             <p className="text-sm text-destructive">Неверный пароль</p>
           ) : null}
-          {errors.currentPassword && currentPasswordStatus === 'idle' ? (
+          {currentPasswordStatus === 'rate_limited' ? (
+            <p className="text-sm text-warning">
+              {currentPasswordMessage ??
+                'Слишком много проверок. Подождите немного.'}
+            </p>
+          ) : null}
+          {currentPasswordStatus === 'idle' && currentPasswordMessage ? (
+            <p className="text-sm text-destructive">{currentPasswordMessage}</p>
+          ) : null}
+          {errors.currentPassword &&
+          currentPasswordStatus === 'idle' &&
+          !currentPasswordMessage ? (
             <p className="text-sm text-destructive">
               {errors.currentPassword.message}
             </p>
