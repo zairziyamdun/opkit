@@ -17,6 +17,7 @@ import {
   type ChangePasswordFormValues,
 } from '../model/schema'
 import { useChangePasswordMutation } from '../model/use-change-password'
+import { useVerifyCurrentPassword } from '../model/use-verify-current-password'
 
 export function ChangePasswordButton() {
   const [isOpen, setIsOpen] = useState(false)
@@ -63,6 +64,9 @@ function ChangePasswordModal({ onClose }: ChangePasswordModalProps) {
   })
 
   const newPassword = watch('newPassword')
+  const currentPassword = watch('currentPassword')
+  const { isValid: isCurrentPasswordValid } =
+    useVerifyCurrentPassword(currentPassword)
 
   function onSubmit(values: ChangePasswordFormValues): void {
     mutation.mutate(
@@ -102,8 +106,12 @@ function ChangePasswordModal({ onClose }: ChangePasswordModalProps) {
             id="cp-current"
             autoComplete="current-password"
             hasError={Boolean(errors.currentPassword)}
+            hasSuccess={isCurrentPasswordValid}
             {...register('currentPassword')}
           />
+          {isCurrentPasswordValid ? (
+            <p className="text-sm text-success">Пароль верный</p>
+          ) : null}
           {errors.currentPassword ? (
             <p className="text-sm text-destructive">
               {errors.currentPassword.message}

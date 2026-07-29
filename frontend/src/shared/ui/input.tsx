@@ -3,18 +3,23 @@ import { cn } from '@/shared/lib/cn'
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   readonly hasError?: boolean
+  readonly hasSuccess?: boolean
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { className, hasError = false, ...props },
+  { className, hasError = false, hasSuccess = false, ...props },
   ref,
 ) {
   return (
     <input
       ref={ref}
       className={cn(
-        'flex h-10 w-full rounded-input border bg-card px-3 py-2 text-small text-foreground outline-none transition-colors placeholder:text-placeholder focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
-        hasError ? 'border-destructive' : 'border-border-hover',
+        'flex h-10 w-full rounded-input border bg-card px-3 py-2 text-small text-foreground outline-none transition-colors placeholder:text-placeholder disabled:cursor-not-allowed disabled:opacity-50',
+        hasError
+          ? 'border-destructive focus-visible:border-destructive focus-visible:ring-2 focus-visible:ring-destructive/20'
+          : hasSuccess
+            ? 'border-success focus-visible:border-success focus-visible:ring-2 focus-visible:ring-success/25'
+            : 'border-border-hover focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring',
         className,
       )}
       {...props}

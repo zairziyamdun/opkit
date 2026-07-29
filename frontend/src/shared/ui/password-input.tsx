@@ -6,10 +6,14 @@ import { Input } from './input'
 export interface PasswordInputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
   readonly hasError?: boolean
+  readonly hasSuccess?: boolean
 }
 
 export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
-  function PasswordInput({ className, hasError = false, disabled, ...props }, ref) {
+  function PasswordInput(
+    { className, hasError = false, hasSuccess = false, disabled, ...props },
+    ref,
+  ) {
     const [isVisible, setIsVisible] = useState(false)
 
     return (
@@ -18,6 +22,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           ref={ref}
           type={isVisible ? 'text' : 'password'}
           hasError={hasError}
+          hasSuccess={hasSuccess}
           disabled={disabled}
           className={cn('pr-11', className)}
           {...props}
@@ -27,7 +32,12 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           tabIndex={-1}
           disabled={disabled}
           aria-label={isVisible ? 'Скрыть пароль' : 'Показать пароль'}
-          className="absolute top-1/2 right-1.5 flex size-8 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
+          className={cn(
+            'absolute top-1/2 right-1.5 flex size-8 -translate-y-1/2 items-center justify-center rounded-md transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-50',
+            hasSuccess && !hasError
+              ? 'text-success hover:text-success'
+              : 'text-muted-foreground hover:text-foreground',
+          )}
           onClick={() => setIsVisible((prev) => !prev)}
         >
           {isVisible ? (

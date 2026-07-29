@@ -30,6 +30,8 @@ import { AuthResponseDto } from './dto/auth-response.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { VerifyPasswordDto } from './dto/verify-password.dto';
+import { VerifyPasswordResponseDto } from './dto/verify-password-response.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @ApiTags('auth')
@@ -119,6 +121,20 @@ export class AuthController {
   ): Promise<void> {
     const refreshToken = await this.authService.changePassword(user.id, dto);
     this.authService.setRefreshCookie(response, refreshToken);
+  }
+
+  @Post('verify-password')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Проверить текущий пароль пользователя' })
+  @ApiOkResponse({ type: VerifyPasswordResponseDto })
+  @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
+  verifyPassword(
+    @CurrentUser() user: UserEntity,
+    @Body() dto: VerifyPasswordDto,
+  ): Promise<VerifyPasswordResponseDto> {
+    return this.authService.verifyPassword(user.id, dto);
   }
 
   private readRefreshCookie(request: Request): string | undefined {

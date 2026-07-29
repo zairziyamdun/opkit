@@ -21,6 +21,7 @@ import { AuthResponseDto } from './dto/auth-response.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { VerifyPasswordDto } from './dto/verify-password.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { RefreshTokenRepository } from './repository/refresh-token.repository';
 
@@ -161,6 +162,21 @@ export class AuthService {
     });
 
     return refreshToken;
+  }
+
+  async verifyPassword(
+    userId: string,
+    dto: VerifyPasswordDto,
+  ): Promise<{ valid: boolean }> {
+    const user = await this.usersService.findById(userId);
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const valid = await bcrypt.compare(dto.password, user.passwordHash);
+
+    return { valid };
   }
 
   setRefreshCookie(response: Response, refreshToken: string): void {
