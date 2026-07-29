@@ -65,8 +65,11 @@ function ChangePasswordModal({ onClose }: ChangePasswordModalProps) {
 
   const newPassword = watch('newPassword')
   const currentPassword = watch('currentPassword')
-  const { isValid: isCurrentPasswordValid } =
+  const { status: currentPasswordStatus } =
     useVerifyCurrentPassword(currentPassword)
+
+  const isCurrentPasswordValid = currentPasswordStatus === 'valid'
+  const isCurrentPasswordInvalid = currentPasswordStatus === 'invalid'
 
   function onSubmit(values: ChangePasswordFormValues): void {
     mutation.mutate(
@@ -105,14 +108,22 @@ function ChangePasswordModal({ onClose }: ChangePasswordModalProps) {
           <PasswordInput
             id="cp-current"
             autoComplete="current-password"
-            hasError={Boolean(errors.currentPassword)}
+            hasError={
+              Boolean(errors.currentPassword) || isCurrentPasswordInvalid
+            }
             hasSuccess={isCurrentPasswordValid}
             {...register('currentPassword')}
           />
-          {isCurrentPasswordValid ? (
+          {currentPasswordStatus === 'checking' ? (
+            <p className="text-sm text-muted-foreground">Проверяем…</p>
+          ) : null}
+          {currentPasswordStatus === 'valid' ? (
             <p className="text-sm text-success">Пароль верный</p>
           ) : null}
-          {errors.currentPassword ? (
+          {currentPasswordStatus === 'invalid' ? (
+            <p className="text-sm text-destructive">Неверный пароль</p>
+          ) : null}
+          {errors.currentPassword && currentPasswordStatus === 'idle' ? (
             <p className="text-sm text-destructive">
               {errors.currentPassword.message}
             </p>
