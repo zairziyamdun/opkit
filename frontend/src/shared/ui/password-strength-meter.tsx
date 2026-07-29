@@ -3,7 +3,7 @@ import { cn } from '@/shared/lib/cn'
 import {
   evaluatePasswordStrength,
   type PasswordStrengthLevel,
-} from '../model/password-strength'
+} from '@/shared/lib/password-strength'
 
 interface PasswordStrengthMeterProps {
   readonly password: string

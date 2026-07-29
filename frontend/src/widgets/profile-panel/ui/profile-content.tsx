@@ -7,6 +7,7 @@ import {
   UserRound,
 } from 'lucide-react'
 import { getUserInitials, type User } from '@/entities/user'
+import { ChangePasswordButton } from '@/features/change-password'
 import { LogoutButton } from '@/features/logout'
 import { ROUTES } from '@/shared/config/routes'
 import { CopyIdButton } from './copy-id-button'
@@ -108,6 +109,24 @@ export function ProfileContent({ user }: ProfileContentProps) {
             label="Последнее обновление"
             value={formatDateTime(user.updatedAt)}
           />
+        </div>
+      </div>
+
+      <div className="overflow-hidden rounded-card border border-border bg-card shadow-card">
+        <div className="border-b border-border px-5 py-3 sm:px-6">
+          <h3 className="text-small font-semibold text-foreground">
+            Безопасность
+          </h3>
+        </div>
+        <div className="flex flex-col gap-4 border-b border-border px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <div className="space-y-1">
+            <p className="text-small font-medium text-foreground">Пароль</p>
+            <p className="max-w-md text-caption text-muted-foreground">
+              Рекомендуем периодически обновлять пароль для повышения
+              безопасности аккаунта.
+            </p>
+          </div>
+          <ChangePasswordButton />
         </div>
       </div>
 

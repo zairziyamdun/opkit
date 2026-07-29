@@ -8,8 +8,14 @@ import {
 import { useRegisterMutation } from '@/features/register/model/use-register'
 import { getErrorMessage, isApiError } from '@/shared/api'
 import { ROUTES } from '@/shared/config/routes'
-import { Alert, Button, Input, Label, PasswordInput } from '@/shared/ui'
-import { PasswordStrengthMeter } from './password-strength-meter'
+import {
+  Alert,
+  Button,
+  Input,
+  Label,
+  PasswordInput,
+  PasswordStrengthMeter,
+} from '@/shared/ui'
 
 export function RegisterForm() {
   const registerMutation = useRegisterMutation()

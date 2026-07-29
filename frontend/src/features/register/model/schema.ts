@@ -2,7 +2,7 @@ import { z } from 'zod'
 import {
   PASSWORD_MAX_LENGTH,
   getFirstFailedPasswordRule,
-} from './password-strength'
+} from '@/shared/lib/password-strength'
 
 export const registerSchema = z
   .object({
