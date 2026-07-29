@@ -8,7 +8,7 @@ import {
 import { useRegisterMutation } from '@/features/register/model/use-register'
 import { getErrorMessage, isApiError } from '@/shared/api'
 import { ROUTES } from '@/shared/config/routes'
-import { Alert, Button, Input, Label } from '@/shared/ui'
+import { Alert, Button, Input, Label, PasswordInput } from '@/shared/ui'
 import { PasswordStrengthMeter } from './password-strength-meter'
 
 export function RegisterForm() {
@@ -85,9 +85,8 @@ export function RegisterForm() {
 
       <div className="space-y-2">
         <Label htmlFor="register-password">Пароль</Label>
-        <Input
+        <PasswordInput
           id="register-password"
-          type="password"
           autoComplete="new-password"
           hasError={Boolean(errors.password)}
           {...register('password')}
@@ -100,9 +99,8 @@ export function RegisterForm() {
 
       <div className="space-y-2">
         <Label htmlFor="register-confirm-password">Подтверждение пароля</Label>
-        <Input
+        <PasswordInput
           id="register-confirm-password"
-          type="password"
           autoComplete="new-password"
           hasError={Boolean(errors.confirmPassword)}
           {...register('confirmPassword')}

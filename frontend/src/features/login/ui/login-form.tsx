@@ -5,7 +5,7 @@ import { loginSchema, type LoginFormValues } from '@/features/login/model/schema
 import { useLoginMutation } from '@/features/login/model/use-login'
 import { getErrorMessage, isApiError } from '@/shared/api'
 import { ROUTES } from '@/shared/config/routes'
-import { Alert, Button, Input, Label } from '@/shared/ui'
+import { Alert, Button, Input, Label, PasswordInput } from '@/shared/ui'
 
 export function LoginForm() {
   const loginMutation = useLoginMutation()
@@ -57,9 +57,8 @@ export function LoginForm() {
 
       <div className="space-y-2">
         <Label htmlFor="login-password">Пароль</Label>
-        <Input
+        <PasswordInput
           id="login-password"
-          type="password"
           autoComplete="current-password"
           hasError={Boolean(errors.password)}
           {...register('password')}
